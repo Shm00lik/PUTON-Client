@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 100 120.65" xmlns="http://www.w3.org/2000/svg">
+  <g id="logo-group" transform="matrix(0.9976779818534851, 0, 0, 0.9972739815711975, -255.64056396484375, -307.0799560546875)" style="">
+    <g id="logo-center" transform="translate(0 0)">
+      <g id="title" style="font-style: normal; font-weight: normal; font-size: 72px; line-height: 1; font-family: 'Brandmark Sans 35 Color'; font-variant-ligatures: normal; text-align: center; text-anchor: middle;" transform="matrix(1, 0, 0, 1, 11.400587, -15.600804)">
+        <g id="path179956" aria-label="P" transform="translate(0 343) translate(244.83500000000004 -19.479999999999997) scale(2.4) translate(-400.62219 50.4)">
+          <path class="c1" d="M80.2007,71.91547h20.16187c14.61719,0,21.60181,7.05661,21.60181,19.15366 c0,11.95303-6.98462,19.00964-20.16162,19.00964c-7.34473,0-11.08911-2.01617-13.46533-7.70465l-0.43188,0.14398 c1.08008,3.74432,3.52832,7.05664,6.69653,8.13672v11.66501H80.2007V71.91547z M107.56325,90.9971 c0-3.81631-2.3042-6.12051-7.20068-6.12051h-5.7605v12.24106h5.7605C105.25905,97.11765,107.56325,94.81345,107.56325,90.9971z" transform="translate(320.42149 -122.31547)" stroke-width="0" stroke-linejoin="miter" stroke-miterlimit="2" fill="#16a389" stroke="#16a389"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
