@@ -1,11 +1,32 @@
+import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import "./App.css";
-import { useState } from "react";
 import Login from "./views/Login";
+
+const darkTheme = createTheme({
+    typography: {
+        fontFamily: "Heebo",
+    },
+
+    palette: {
+        mode: "dark",
+
+        primary: {
+            main: "#18A48C",
+        },
+        secondary: {
+            main: "#42B8A3",
+        },
+    },
+});
 
 function App() {
     return (
         <>
-            <Login></Login>
+            <ThemeProvider theme={darkTheme}>
+                <CssBaseline>
+                    <Login />
+                </CssBaseline>
+            </ThemeProvider>
         </>
     );
 }
