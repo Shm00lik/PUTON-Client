@@ -8,9 +8,9 @@ const Login = () => {
     const [password, setPassword] = useState("");
 
     const handleLogin = async () => {
-        const result = await Client.login(username, password);
+        let result = await Client.login(username, password);
 
-        alert(result);
+        setUsername(String(result));
     };
 
     return (
@@ -24,6 +24,7 @@ const Login = () => {
                         onChange={(newName) =>
                             setUsername(newName.target.value)
                         }
+                        value={username}
                     />
                 </Grid>
 
