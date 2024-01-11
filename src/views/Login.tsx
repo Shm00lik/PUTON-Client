@@ -1,16 +1,43 @@
 import { useState } from "react";
 import "./Login.css";
-import { Button, Grid, TextField } from "@mui/material";
-import { Client } from "../utils/Client";
+import {
+    Alert,
+    AlertColor,
+    Button,
+    Collapse,
+    Grid,
+    IconButton,
+    Snackbar,
+    TextField,
+} from "@mui/material";
+import { Client, Response } from "../utils/Protocol";
 
 const Login = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
-    const handleLogin = async () => {
-        let result = await Client.login(username, password);
+    const [isAlertOpen, setAlertIsOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState("");
+    const [alertColor, setAlertColor] = useState<AlertColor>("error");
 
-        setUsername(String(result));
+    const handleLogin = async () => {
+        let result: Response = await Client.login(username, password);
+
+        if (!result.body.success) {
+            handleAlert("Invalid username or password", "error");
+            return;
+        }
+
+        localStorage.setItem("username", username);
+        localStorage.setItem("password", password);
+
+        handleAlert("Successfully logged in!", "success");
+    };
+
+    const handleAlert = (message: string, alertColor: AlertColor) => {
+        setAlertIsOpen(true);
+        setAlertColor(alertColor);
+        setAlertMessage(message);
     };
 
     return (
@@ -48,6 +75,18 @@ const Login = () => {
                     </Button>
                 </Grid>
             </Grid>
+
+            <Snackbar
+                open={isAlertOpen}
+                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+                autoHideDuration={5000}
+                ClickAwayListenerProps={{ mouseEvent: false }}
+                onClose={() => setAlertIsOpen(false)}
+            >
+                <Alert severity={alertColor} sx={{ width: "100%" }}>
+                    {alertMessage}
+                </Alert>
+            </Snackbar>
         </div>
     );
 };
