@@ -18,6 +18,24 @@ export class Client {
             response.url
         );
     }
+
+    public static async register(formData: {
+        email: string;
+        username: string;
+        password: string;
+    }): Promise<Response> {
+        let response = await fetch("http://localhost:3339/register", {
+            method: "POST",
+            body: JSON.stringify(formData),
+        });
+
+        return new Response(
+            response.status,
+            response.ok,
+            await response.text(),
+            response.url
+        );
+    }
 }
 
 export class Response {

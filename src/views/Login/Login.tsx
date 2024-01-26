@@ -10,7 +10,7 @@ import {
     Snackbar,
     TextField,
 } from "@mui/material";
-import { Client, Response } from "../utils/Protocol";
+import { Client, Response } from "../../utils/Protocol";
 
 const Login = () => {
     const [username, setUsername] = useState("");
@@ -24,14 +24,14 @@ const Login = () => {
         let result: Response = await Client.login(username, password);
 
         if (!result.body.success) {
-            handleAlert("Invalid username or password", "error");
+            handleAlert(result.body.message, "error");
             return;
         }
 
         localStorage.setItem("username", username);
         localStorage.setItem("password", password);
 
-        handleAlert("Successfully logged in!", "success");
+        handleAlert(result.body.message, "success");
     };
 
     const handleAlert = (message: string, alertColor: AlertColor) => {

@@ -1,6 +1,7 @@
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import "./App.css";
-import Login from "./views/Login";
+import Login from "./views/Login/Login";
+import Register from "./views/Register/Register";
 
 const darkTheme = createTheme({
     typography: {
@@ -24,7 +25,7 @@ function App() {
         <>
             <ThemeProvider theme={darkTheme}>
                 <CssBaseline>
-                    <Login />
+                    <Register />
                 </CssBaseline>
             </ThemeProvider>
         </>
