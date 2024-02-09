@@ -32,6 +32,8 @@ const Login = () => {
         localStorage.setItem("password", password);
 
         handleAlert(result.body.message, "success");
+
+        window.location.href = "/"
     };
 
     const handleAlert = (message: string, alertColor: AlertColor) => {

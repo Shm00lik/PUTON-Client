@@ -3,8 +3,8 @@ export class Client {
     public static PORT: number = 3339;
 
     public static async login(
-        username: string,
-        password: string
+        username: string | null,
+        password: string | null
     ): Promise<Response> {
         let response = await fetch("http://localhost:3339/login", {
             method: "POST",
