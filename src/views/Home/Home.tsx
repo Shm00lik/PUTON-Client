@@ -6,8 +6,21 @@ const Home = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
+        const username: string | null = localStorage.getItem("username");
+        const password: string | null = localStorage.getItem("password");
+
+        if (username == null || password == null) {
+            window.location.href = "/login"
+            return;
+        }
+
         const runThis = async () => {
-            let result: Response = await Client.login(localStorage.getItem("username"), localStorage.getItem("username"));
+            const formData: {
+                username: string;
+                password: string;
+            } = { "username": username, "password": password };
+
+            let result: Response = await Client.login(formData);
 
             if (!result.body.success) {
                 window.location.href = "/login"

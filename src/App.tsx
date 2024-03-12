@@ -1,9 +1,9 @@
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
-import Home from "./views/Home/Home";
-import Login from "./views/Login/Login";
-import Register from "./views/Register/Register";
+import Home from "./views/home/Home";
+import Login from "./views/login/Login";
+import Register from "./views/register/Register";
 
 
 const darkTheme = createTheme({
@@ -23,15 +23,26 @@ const darkTheme = createTheme({
     },
 });
 
+export const MIN_USERNAME_LENGTH: number = 1;
+export const MIN_PASSWORD_LENGTH: number = 1;
+export const enum RoutesOptions {
+    HOME = "/",
+    LOGIN = "/login",    
+    REGISTER = "/register",    
+}
+export const route = function(location: RoutesOptions) {
+    window.location.href = location;
+}
+
 function App() {
     return (
         <ThemeProvider theme={darkTheme}>
             <CssBaseline>
                 <BrowserRouter>
                     <Routes>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
+                        <Route path={RoutesOptions.HOME} element={<Home />} />
+                        <Route path={RoutesOptions.LOGIN} element={<Login />} />
+                        <Route path={RoutesOptions.REGISTER} element={<Register />} />
                     </Routes>
                 </BrowserRouter>
             </CssBaseline>

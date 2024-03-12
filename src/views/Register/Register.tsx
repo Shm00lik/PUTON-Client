@@ -1,27 +1,30 @@
-import { FormEvent, useState } from "react";
-import "./Register.css";
 import {
     Alert,
     AlertColor,
     Button,
-    Collapse,
     Grid,
-    IconButton,
     Snackbar,
     TextField,
 } from "@mui/material";
+import { FormEvent, useState } from "react";
+import { MIN_PASSWORD_LENGTH, MIN_USERNAME_LENGTH, route, RoutesOptions } from "../../App";
 import { Client, Response } from "../../utils/Protocol";
+import "./Register.css";
 
 const Register = () => {
     const [formData, setFormData] = useState({
-        email: "",
-        username: "",
-        password: "",
+        email: "yali@yali.com",
+        username: "yali1234",
+        password: "yali1234",
     });
 
     const [isAlertOpen, setAlertIsOpen] = useState(false);
     const [alertMessage, setAlertMessage] = useState("");
     const [alertColor, setAlertColor] = useState<AlertColor>("error");
+
+    const handleChange = (e: any) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
     const handleRegister = async (event: FormEvent) => {
         event.preventDefault();
@@ -37,16 +40,14 @@ const Register = () => {
         localStorage.setItem("password", formData.password);
 
         handleAlert(result.body.message, "success");
+
+        route(RoutesOptions.HOME);
     };
 
     const handleAlert = (message: string, alertColor: AlertColor) => {
         setAlertIsOpen(true);
         setAlertColor(alertColor);
         setAlertMessage(message);
-    };
-
-    const handleChange = (e: any) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     return (
@@ -62,6 +63,7 @@ const Register = () => {
                             name="email"
                             onChange={handleChange}
                             value={formData.email}
+                            required
                         />
                     </Grid>
 
@@ -71,6 +73,8 @@ const Register = () => {
                             name="username"
                             onChange={handleChange}
                             value={formData.username}
+                            inputProps={{ minLength: MIN_USERNAME_LENGTH }}
+                            required
                         />
                     </Grid>
 
@@ -81,6 +85,8 @@ const Register = () => {
                             name="password"
                             onChange={handleChange}
                             value={formData.password}
+                            inputProps={{ minLength: MIN_PASSWORD_LENGTH }}
+                            required
                         />
                     </Grid>
 

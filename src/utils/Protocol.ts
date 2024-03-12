@@ -2,13 +2,13 @@ export class Client {
     public static HOST: string = "http://localhost";
     public static PORT: number = 3339;
 
-    public static async login(
-        username: string | null,
-        password: string | null
-    ): Promise<Response> {
+    public static async login(formData: {
+        username: string;
+        password: string;
+    }): Promise<Response> {
         let response = await fetch("http://localhost:3339/login", {
             method: "POST",
-            body: JSON.stringify({ username, password }),
+            body: JSON.stringify(formData),
         });
 
         return new Response(
