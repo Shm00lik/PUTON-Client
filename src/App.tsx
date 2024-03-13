@@ -1,9 +1,11 @@
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import Home from "./views/home/Home";
 import Login from "./views/login/Login";
 import Register from "./views/register/Register";
+import Wishlist from "./views/wishlist/Wishlist";
+import Appbar from "./components/Appbar";
 
 
 const darkTheme = createTheme({
@@ -23,14 +25,16 @@ const darkTheme = createTheme({
     },
 });
 
-export const MIN_USERNAME_LENGTH: number = 1;
-export const MIN_PASSWORD_LENGTH: number = 1;
-export const enum RoutesOptions {
+export const MIN_USERNAME_LENGTH: number = 6;
+export const MIN_PASSWORD_LENGTH: number = 6;
+
+export const enum RouteOptions {
     HOME = "/",
-    LOGIN = "/login",    
-    REGISTER = "/register",    
+    LOGIN = "/login",
+    REGISTER = "/register",
+    WISHLIST = "/wishlist"
 }
-export const route = function(location: RoutesOptions) {
+export const route = function (location: RouteOptions) {
     window.location.href = location;
 }
 
@@ -38,11 +42,15 @@ function App() {
     return (
         <ThemeProvider theme={darkTheme}>
             <CssBaseline>
+                
+                <Appbar />
+
                 <BrowserRouter>
                     <Routes>
-                        <Route path={RoutesOptions.HOME} element={<Home />} />
-                        <Route path={RoutesOptions.LOGIN} element={<Login />} />
-                        <Route path={RoutesOptions.REGISTER} element={<Register />} />
+                        <Route path={RouteOptions.HOME} element={<Home />} />
+                        <Route path={RouteOptions.LOGIN} element={<Login />} />
+                        <Route path={RouteOptions.REGISTER} element={<Register />} />
+                        <Route path={RouteOptions.WISHLIST} element={<Wishlist />} />
                     </Routes>
                 </BrowserRouter>
             </CssBaseline>

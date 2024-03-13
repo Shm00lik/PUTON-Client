@@ -36,6 +36,30 @@ export class Client {
             response.url
         );
     }
+
+    public static async logout(): Promise<Response> {
+        // localStorage.clear();
+        
+        return new Response(
+            200,
+            true,
+            JSON.stringify({success: true}),
+            "/"
+        )
+    }
+
+    public static async getWishlist(username: string | null): Promise<Response> {
+        let response = await fetch("http://localhost:3339/getWishlist?username=" + username, {
+            method: "GET",
+        });
+
+        return new Response(
+            response.status,
+            response.ok,
+            await response.text(),
+            response.url
+        );
+    }
 }
 
 export class Response {

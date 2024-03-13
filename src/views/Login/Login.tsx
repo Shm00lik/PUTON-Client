@@ -7,9 +7,9 @@ import {
     TextField,
 } from "@mui/material";
 import { FormEvent, useState } from "react";
-import { MIN_PASSWORD_LENGTH, MIN_USERNAME_LENGTH, route, RoutesOptions } from "../../App";
+import { MIN_PASSWORD_LENGTH, MIN_USERNAME_LENGTH, route, RouteOptions } from "../../App";
 import { Client, Response } from "../../utils/Protocol";
-import "./Login.css";
+
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -40,7 +40,7 @@ const Login = () => {
 
         handleAlert(result.body.message, "success");
 
-        route(RoutesOptions.HOME);
+        route(RouteOptions.HOME);
     };
 
     const handleAlert = (message: string, alertColor: AlertColor) => {
@@ -53,40 +53,39 @@ const Login = () => {
         <div style={{ textAlign: "center" }}>
             <h1>Login</h1>
 
-            <Grid container direction={"column"} spacing={2}>
-                <Grid item>
-                    <TextField
-                        label="Username"
-                        name="username"
-                        onChange={handleChange}
-                        value={formData.username}
-                        inputProps={{ minLength: MIN_USERNAME_LENGTH }}
-                        required
-                    />
+            <form onSubmit={handleLogin}>
+                <Grid container direction={"column"} spacing={2}>
+                    <Grid item>
+                        <TextField
+                            label="Username"
+                            name="username"
+                            onChange={handleChange}
+                            value={formData.username}
+                            inputProps={{ minLength: MIN_USERNAME_LENGTH }}
+                            required
+                        />
+                    </Grid>
+
+                    <Grid item>
+                        <TextField
+                            label="Password"
+                            type="password"
+                            name="password"
+                            onChange={handleChange}
+                            value={formData.password}
+                            inputProps={{ minLength: MIN_PASSWORD_LENGTH }}
+                            required
+                        />
+                    </Grid>
+
+                    <Grid item>
+                        <Button type="submit" variant="outlined" size="large">
+                            Login
+                        </Button>
+                    </Grid>
                 </Grid>
 
-                <Grid item>
-                    <TextField
-                        label="Password"
-                        type="password"
-                        name="password"
-                        onChange={handleChange}
-                        value={formData.password}
-                        inputProps={{ minLength: MIN_PASSWORD_LENGTH }}
-                        required
-                    />
-                </Grid>
-
-                <Grid item>
-                    <Button
-                        variant="outlined"
-                        size="large"
-                        onClick={handleLogin}
-                    >
-                        Login
-                    </Button>
-                </Grid>
-            </Grid>
+            </form>
 
             <Snackbar
                 open={isAlertOpen}

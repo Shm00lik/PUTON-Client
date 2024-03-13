@@ -7,9 +7,9 @@ import {
     TextField,
 } from "@mui/material";
 import { FormEvent, useState } from "react";
-import { MIN_PASSWORD_LENGTH, MIN_USERNAME_LENGTH, route, RoutesOptions } from "../../App";
+import { MIN_PASSWORD_LENGTH, MIN_USERNAME_LENGTH, route, RouteOptions } from "../../App";
 import { Client, Response } from "../../utils/Protocol";
-import "./Register.css";
+
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -41,7 +41,7 @@ const Register = () => {
 
         handleAlert(result.body.message, "success");
 
-        route(RoutesOptions.HOME);
+        route(RouteOptions.HOME);
     };
 
     const handleAlert = (message: string, alertColor: AlertColor) => {

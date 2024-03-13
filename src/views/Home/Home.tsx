@@ -1,16 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { RouteOptions, route } from "../../App";
 import { Client, Response } from "../../utils/Protocol";
 
 
 const Home = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-
     useEffect(() => {
         const username: string | null = localStorage.getItem("username");
         const password: string | null = localStorage.getItem("password");
 
         if (username == null || password == null) {
-            window.location.href = "/login"
+            route(RouteOptions.LOGIN);
             return;
         }
 
@@ -23,11 +22,12 @@ const Home = () => {
             let result: Response = await Client.login(formData);
 
             if (!result.body.success) {
-                window.location.href = "/login"
+                localStorage.removeItem("username");
+                localStorage.removeItem("password");
+
+                route(RouteOptions.LOGIN);
                 return;
             }
-
-            setIsLoggedIn(true);
         };
 
         runThis();
@@ -35,9 +35,7 @@ const Home = () => {
 
     return (
         <>
-            {!isLoggedIn ? <></> : <h1>Hello, World!</h1>}
         </>
-
     );
 };
 
