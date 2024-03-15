@@ -13,8 +13,8 @@ import { Client, Response } from "../../utils/Protocol";
 
 const Login = () => {
     const [formData, setFormData] = useState({
-        username: "",
-        password: "",
+        username: "yali1234",
+        password: "yali1234",
     });
 
     const [isAlertOpen, setAlertIsOpen] = useState(false);

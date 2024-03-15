@@ -1,22 +1,22 @@
 import { useEffect, useState } from "react";
-import { Client, Response } from "../../utils/Protocol";
+import { Client } from "../../utils/Protocol";
+import { Product } from "../../utils/Product";
+
 
 const Wishlist = () => {
-    const [wishlistProducts, setWishlistProducts] = useState([]);
-    
+    const [wishlistProducts, setWishlistProducts] = useState<(Product | null)[]>([]);
 
     useEffect(() => {
         const runThis = async () => {
-            let result: Response = await Client.getWishlist(localStorage.getItem("username"));
-            console.log(result);
-
-            setWishlistProducts(result.body)
+            setWishlistProducts(await Client.wishlist());
         };
 
         runThis();
     }, []);
 
-    return <>NIGGA</>
+    return <>
+        {wishlistProducts}
+    </>
 }
 
 export default Wishlist;

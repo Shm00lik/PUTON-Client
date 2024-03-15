@@ -1,3 +1,6 @@
+import { Product } from "./Product";
+
+
 export class Client {
     public static HOST: string = "http://localhost";
     public static PORT: number = 3339;
@@ -27,7 +30,7 @@ export class Client {
     }): Promise<Response> {
         let response = await fetch(Client.baseURL + "/register", {
             method: "POST",
-            body: JSON.stringify(formData),
+            body: JSON.stringify(formData)
         });
 
         return new Response(
@@ -40,6 +43,7 @@ export class Client {
 
     public static async logout(): Promise<Response> {
         // localStorage.clear();
+        // document.cookie = 'Token;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
         
         return new Response(
             200,
@@ -49,17 +53,63 @@ export class Client {
         )
     }
 
-    public static async getWishlist(username: string | null): Promise<Response> {
-        let response = await fetch(Client.baseURL + "/getWishlist?username=" + username, {
+    public static async wishlist(): Promise<(Product | null)[]> {
+        let response = await fetch(Client.baseURL + "/wishlist", {
             method: "GET",
+            headers: {
+                Token: document.cookie.split("=")[1],
+            }
         });
 
-        return new Response(
+        let parsedResponse: Response = new Response(
             response.status,
             response.ok,
             await response.text(),
             response.url
         );
+
+        let products: (Product | null)[] = [];
+        
+        if (!parsedResponse.body.success) {
+            return products;
+        }
+
+
+        parsedResponse.body.message.forEach(async (p: Number) => {
+            products.push(await Client.product(p))
+        });
+
+        return products
+    }
+
+    public static async product(id: Number | string | null): Promise<Product | null> {
+        let response = await fetch(Client.baseURL + "/product/" + id, {
+            method: "GET",
+            headers: {
+                Token: document.cookie.split("=")[1],
+            }
+        });
+
+        let parsedResponse = new Response(
+            response.status,
+            response.ok,
+            await response.text(),
+            response.url
+        );
+
+        console.log(parsedResponse)
+
+        if (!parsedResponse.body.success) {
+            return null;
+        }
+
+        return new Product(
+            parsedResponse.body.message.productID,
+            parsedResponse.body.message.title,
+            parsedResponse.body.message.description,
+            parsedResponse.body.message.price,
+            parsedResponse.body.message.image,
+        )
     }
 }
 
