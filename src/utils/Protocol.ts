@@ -1,12 +1,13 @@
 export class Client {
     public static HOST: string = "http://localhost";
     public static PORT: number = 3339;
+    public static baseURL: string = `${Client.HOST}:${Client.PORT}`;
 
     public static async login(formData: {
         username: string;
         password: string;
     }): Promise<Response> {
-        let response = await fetch("http://localhost:3339/login", {
+        let response = await fetch(Client.baseURL + "/login", {
             method: "POST",
             body: JSON.stringify(formData),
         });
@@ -24,7 +25,7 @@ export class Client {
         username: string;
         password: string;
     }): Promise<Response> {
-        let response = await fetch("http://localhost:3339/register", {
+        let response = await fetch(Client.baseURL + "/register", {
             method: "POST",
             body: JSON.stringify(formData),
         });
@@ -49,7 +50,7 @@ export class Client {
     }
 
     public static async getWishlist(username: string | null): Promise<Response> {
-        let response = await fetch("http://localhost:3339/getWishlist?username=" + username, {
+        let response = await fetch(Client.baseURL + "/getWishlist?username=" + username, {
             method: "GET",
         });
 
