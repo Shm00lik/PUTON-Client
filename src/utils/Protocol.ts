@@ -54,6 +54,8 @@ export class Client {
     }
 
     public static async wishlist(): Promise<(Product | null)[]> {
+        console.time("wishlist");
+        
         let response = await fetch(Client.baseURL + "/wishlist", {
             method: "GET",
             headers: {
@@ -66,18 +68,23 @@ export class Client {
             response.ok,
             await response.text(),
             response.url
-        );
-
+            );
+            
         let products: (Product | null)[] = [];
         
         if (!parsedResponse.body.success) {
             return products;
         }
 
+        let promisesArray = [];
+        
+        for await (const productID of parsedResponse.body.message) {
+            products.push(await Client.product(productID))
+        }
+        
+        // products = await Promise.all(promisesArray);
 
-        parsedResponse.body.message.forEach(async (p: Number) => {
-            products.push(await Client.product(p))
-        });
+        console.timeEnd("wishlist");
 
         return products
     }
@@ -96,8 +103,6 @@ export class Client {
             await response.text(),
             response.url
         );
-
-        console.log(parsedResponse)
 
         if (!parsedResponse.body.success) {
             return null;
