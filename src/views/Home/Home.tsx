@@ -2,8 +2,7 @@ import { useEffect } from "react";
 import { RouteOptions, route } from "../../App";
 import { Client, Response } from "../../utils/Protocol";
 
-
-const Home = () => {
+const HomeView = () => {
     useEffect(() => {
         const username: string | null = localStorage.getItem("username");
         const password: string | null = localStorage.getItem("password");
@@ -17,7 +16,7 @@ const Home = () => {
             const formData: {
                 username: string;
                 password: string;
-            } = { "username": username, "password": password };
+            } = { username: username, password: password };
 
             let result: Response = await Client.login(formData);
 
@@ -33,10 +32,7 @@ const Home = () => {
         runThis();
     }, []);
 
-    return (
-        <>
-        </>
-    );
+    return <></>;
 };
 
-export default Home;
+export default HomeView;

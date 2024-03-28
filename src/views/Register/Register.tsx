@@ -7,11 +7,15 @@ import {
     TextField,
 } from "@mui/material";
 import { FormEvent, useState } from "react";
-import { MIN_PASSWORD_LENGTH, MIN_USERNAME_LENGTH, route, RouteOptions } from "../../App";
+import {
+    MIN_PASSWORD_LENGTH,
+    MIN_USERNAME_LENGTH,
+    route,
+    RouteOptions,
+} from "../../App";
 import { Client, Response } from "../../utils/Protocol";
 
-
-const Register = () => {
+const RegisterView = () => {
     const [formData, setFormData] = useState({
         email: "yali@yali.com",
         username: "yali1234",
@@ -113,4 +117,4 @@ const Register = () => {
     );
 };
 
-export default Register;
+export default RegisterView;

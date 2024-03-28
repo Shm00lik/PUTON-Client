@@ -7,11 +7,15 @@ import {
     TextField,
 } from "@mui/material";
 import { FormEvent, useState } from "react";
-import { MIN_PASSWORD_LENGTH, MIN_USERNAME_LENGTH, route, RouteOptions } from "../../App";
+import {
+    MIN_PASSWORD_LENGTH,
+    MIN_USERNAME_LENGTH,
+    route,
+    RouteOptions,
+} from "../../App";
 import { Client, Response } from "../../utils/Protocol";
 
-
-const Login = () => {
+const LoginView = () => {
     const [formData, setFormData] = useState({
         username: "yali1234",
         password: "yali1234",
@@ -84,7 +88,6 @@ const Login = () => {
                         </Button>
                     </Grid>
                 </Grid>
-
             </form>
 
             <Snackbar
@@ -102,4 +105,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default LoginView;

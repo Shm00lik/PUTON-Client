@@ -1,12 +1,12 @@
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
-import Home from "./views/home/Home";
-import Login from "./views/login/Login";
-import Register from "./views/register/Register";
-import Wishlist from "./views/wishlist/Wishlist";
 import Appbar from "./components/Appbar";
-
+import HomeView from "./views/home/Home";
+import LoginView from "./views/login/Login";
+import RegisterView from "./views/register/Register";
+import WishlistView from "./views/wishlist/Wishlist";
+import ProductView from "./views/product/Product";
 
 const darkTheme = createTheme({
     typography: {
@@ -32,25 +32,41 @@ export const enum RouteOptions {
     HOME = "/",
     LOGIN = "/login",
     REGISTER = "/register",
-    WISHLIST = "/wishlist"
+    WISHLIST = "/wishlist",
+    PRODUCT = "/product/:id",
 }
 export const route = function (location: RouteOptions) {
     window.location.href = location;
-}
+};
 
 function App() {
     return (
         <ThemeProvider theme={darkTheme}>
             <CssBaseline>
-                
                 <Appbar />
 
                 <BrowserRouter>
                     <Routes>
-                        <Route path={RouteOptions.HOME} element={<Home />} />
-                        <Route path={RouteOptions.LOGIN} element={<Login />} />
-                        <Route path={RouteOptions.REGISTER} element={<Register />} />
-                        <Route path={RouteOptions.WISHLIST} element={<Wishlist />} />
+                        <Route
+                            path={RouteOptions.HOME}
+                            element={<HomeView />}
+                        />
+                        <Route
+                            path={RouteOptions.LOGIN}
+                            element={<LoginView />}
+                        />
+                        <Route
+                            path={RouteOptions.REGISTER}
+                            element={<RegisterView />}
+                        />
+                        <Route
+                            path={RouteOptions.WISHLIST}
+                            element={<WishlistView />}
+                        />
+                        <Route
+                            path={RouteOptions.PRODUCT}
+                            element={<ProductView />}
+                        />
                     </Routes>
                 </BrowserRouter>
             </CssBaseline>

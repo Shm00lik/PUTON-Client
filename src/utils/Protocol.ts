@@ -1,6 +1,5 @@
 import { Product } from "./Product";
 
-
 export class Client {
     public static HOST: string = "http://localhost";
     public static PORT: number = 3339;
@@ -30,7 +29,7 @@ export class Client {
     }): Promise<Response> {
         let response = await fetch(Client.baseURL + "/register", {
             method: "POST",
-            body: JSON.stringify(formData)
+            body: JSON.stringify(formData),
         });
 
         return new Response(
@@ -44,23 +43,16 @@ export class Client {
     public static async logout(): Promise<Response> {
         // localStorage.clear();
         // document.cookie = 'Token;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-        
-        return new Response(
-            200,
-            true,
-            JSON.stringify({success: true}),
-            "/"
-        )
+
+        return new Response(200, true, JSON.stringify({ success: true }), "/");
     }
 
-    public static async wishlist(): Promise<(Product | null)[]> {
-        console.time("wishlist");
-        
+    public static async wishlist(): Promise<Product[]> {
         let response = await fetch(Client.baseURL + "/wishlist", {
             method: "GET",
             headers: {
                 Token: document.cookie.split("=")[1],
-            }
+            },
         });
 
         let parsedResponse: Response = new Response(
@@ -68,33 +60,37 @@ export class Client {
             response.ok,
             await response.text(),
             response.url
-            );
-            
-        let products: (Product | null)[] = [];
-        
+        );
+
+        let products: Product[] = [];
+
         if (!parsedResponse.body.success) {
             return products;
         }
 
-        let promisesArray = [];
-        
-        for await (const productID of parsedResponse.body.message) {
-            products.push(await Client.product(productID))
-        }
-        
-        // products = await Promise.all(promisesArray);
+        parsedResponse.body.message.forEach((product: any) => {
+            products.push(
+                new Product(
+                    product.productID,
+                    product.title,
+                    product.description,
+                    product.price,
+                    product.image
+                )
+            );
+        });
 
-        console.timeEnd("wishlist");
-
-        return products
+        return products;
     }
 
-    public static async product(id: Number | string | null): Promise<Product | null> {
+    public static async product(
+        id: Number | string | null
+    ): Promise<Product | null> {
         let response = await fetch(Client.baseURL + "/product/" + id, {
             method: "GET",
             headers: {
                 Token: document.cookie.split("=")[1],
-            }
+            },
         });
 
         let parsedResponse = new Response(
@@ -113,8 +109,8 @@ export class Client {
             parsedResponse.body.message.title,
             parsedResponse.body.message.description,
             parsedResponse.body.message.price,
-            parsedResponse.body.message.image,
-        )
+            parsedResponse.body.message.image
+        );
     }
 }
 
