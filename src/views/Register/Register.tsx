@@ -13,10 +13,10 @@ import {
     route,
     RouteOptions,
 } from "../../App";
-import { Client, Response } from "../../utils/Protocol";
+import { Client, RegisterData, Response } from "../../utils/Protocol";
 
 const RegisterView = () => {
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<RegisterData>({
         email: "yali@yali.com",
         username: "yali1234",
         password: "yali1234",

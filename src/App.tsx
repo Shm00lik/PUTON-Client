@@ -7,6 +7,8 @@ import LoginView from "./views/login/Login";
 import RegisterView from "./views/register/Register";
 import WishlistView from "./views/wishlist/Wishlist";
 import ProductView from "./views/product/Product";
+import { useEffect, useState } from "react";
+import { Client, Response } from "./utils/Protocol";
 
 const darkTheme = createTheme({
     typography: {
@@ -35,11 +37,27 @@ export const enum RouteOptions {
     WISHLIST = "/wishlist",
     PRODUCT = "/product/:id",
 }
+
 export const route = function (location: RouteOptions) {
     window.location.href = location;
 };
 
 function App() {
+    useEffect(() => {
+        if (window.location.pathname == RouteOptions.LOGIN || window.location.pathname == RouteOptions.REGISTER) return;
+
+        const runThis = async () => {
+            let result: Response = await Client.me();
+
+            if (!result.body.success) {
+                route(RouteOptions.LOGIN);
+                return;
+            }
+        };
+
+        runThis();
+    }, [window.location.href]);
+
     return (
         <ThemeProvider theme={darkTheme}>
             <CssBaseline>

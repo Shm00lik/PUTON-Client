@@ -1,18 +1,42 @@
 import { Product } from "./Product";
 
+export interface LoginData {
+    username: string;
+    password: string;
+}
+
+export interface RegisterData {
+    email: string;
+    username: string;
+    password: string;
+}
+
 export class Client {
     public static HOST: string = "http://localhost";
     public static PORT: number = 3339;
     public static baseURL: string = `${Client.HOST}:${Client.PORT}`;
 
-    public static async login(formData: {
-        username: string;
-        password: string;
-    }): Promise<Response> {
-        let response = await fetch(Client.baseURL + "/login", {
-            method: "POST",
-            body: JSON.stringify(formData),
+    private static async request(url: string, method: string, body?: string) {
+        if (method == "POST") {
+            return await fetch(Client.baseURL + url, {
+                method: method,
+                body: body,
+                headers: {
+                    token: localStorage.getItem("token") || "",
+                },
+            });
+        }
+
+        return await fetch(Client.baseURL + url, {
+            method: method,
+            headers: {
+                token: localStorage.getItem("token") || "",
+            },
         });
+    }
+            
+    public static async me(): Promise<Response> {
+        let response = await this.request("/me", "GET");
 
         return new Response(
             response.status,
@@ -22,15 +46,19 @@ export class Client {
         );
     }
 
-    public static async register(formData: {
-        email: string;
-        username: string;
-        password: string;
-    }): Promise<Response> {
-        let response = await fetch(Client.baseURL + "/register", {
-            method: "POST",
-            body: JSON.stringify(formData),
-        });
+    public static async login(formData: LoginData): Promise<Response> {
+        let response = await this.request("/login", "POST", JSON.stringify(formData));
+        
+        return new Response(
+            response.status,
+            response.ok,
+            await response.text(),
+            response.url
+        );
+    }
+
+    public static async register(formData: RegisterData): Promise<Response> {
+        let response = await this.request("/register", "POST", JSON.stringify(formData))
 
         return new Response(
             response.status,
@@ -42,18 +70,12 @@ export class Client {
 
     public static async logout(): Promise<Response> {
         // localStorage.clear();
-        // document.cookie = 'Token;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 
         return new Response(200, true, JSON.stringify({ success: true }), "/");
     }
 
     public static async wishlist(): Promise<Product[]> {
-        let response = await fetch(Client.baseURL + "/wishlist", {
-            method: "GET",
-            headers: {
-                Token: document.cookie.split("=")[1],
-            },
-        });
+        let response = await this.request("/wishlist", "GET")
 
         let parsedResponse: Response = new Response(
             response.status,
@@ -86,12 +108,7 @@ export class Client {
     public static async product(
         id: Number | string | null
     ): Promise<Product | null> {
-        let response = await fetch(Client.baseURL + "/product/" + id, {
-            method: "GET",
-            headers: {
-                Token: document.cookie.split("=")[1],
-            },
-        });
+        let response = await this.request("/product/" + id, "GET")
 
         let parsedResponse = new Response(
             response.status,

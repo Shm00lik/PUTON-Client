@@ -13,10 +13,10 @@ import {
     route,
     RouteOptions,
 } from "../../App";
-import { Client, Response } from "../../utils/Protocol";
+import { Client, LoginData, Response } from "../../utils/Protocol";
 
 const LoginView = () => {
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<LoginData>({
         username: "yali1234",
         password: "yali1234",
     });
@@ -39,9 +39,8 @@ const LoginView = () => {
             return;
         }
 
-        localStorage.setItem("username", formData.username);
-        localStorage.setItem("password", formData.password);
-
+        localStorage.setItem("token", result.body.message.token);
+        
         handleAlert(result.body.message, "success");
 
         route(RouteOptions.HOME);
