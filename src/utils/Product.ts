@@ -11,7 +11,7 @@ export class Product {
         this.title = title;
         this.description = description;
         this.price = price;
-        this.image = image;
+        this.image = "data:image/jpg;base64," + image;
     }
 
     public hi() : string {

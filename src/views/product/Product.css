@@ -1,0 +1,25 @@
+.parallax-container {
+    overflow: hidden;
+  }
+  
+  .foreground-layer,
+  .background-layer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .foreground-layer {
+    z-index: 2; /* Ensure foreground content stays on top */
+  }
+  
+  .background-layer {
+    z-index: 1;
+    background-size: cover; /* Ensure background image fills the container */
+  }
+  
+  /* Optional styles for positioning and animation */
+  .foreground-layer img,
+  .background-layer img {
+    width: 100%; /* Adjust width as needed */
+  }

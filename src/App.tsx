@@ -38,13 +38,26 @@ export const enum RouteOptions {
     PRODUCT = "/product/:id",
 }
 
-export const route = function (location: RouteOptions) {
-    window.location.href = location;
+export const route = function (
+    location: RouteOptions,
+    params: { [key: string]: any } = {}
+) {
+    let url: string = location;
+
+    Object.keys(params).forEach((key) => {
+        url = url.replace(":" + key, params[key]);
+    });
+
+    window.location.href = url;
 };
 
 function App() {
     useEffect(() => {
-        if (window.location.pathname == RouteOptions.LOGIN || window.location.pathname == RouteOptions.REGISTER) return;
+        if (
+            window.location.pathname == RouteOptions.LOGIN ||
+            window.location.pathname == RouteOptions.REGISTER
+        )
+            return;
 
         const runThis = async () => {
             let result: Response = await Client.me();
