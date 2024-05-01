@@ -61,6 +61,8 @@ const CameraTextDetector: React.FC = () => {
             const detectFrame = async () => {
                 const predictions = await model.detect(video);
 
+                // Clear canvas
+                context.clearRect(0, 0, canvas.width, canvas.height);
                 let hasPerson = false;
 
                 if (predictions.length != 0) {
@@ -72,9 +74,6 @@ const CameraTextDetector: React.FC = () => {
                     hasPerson = filteredPredictions.some(
                         (prediction) => prediction.class === "person"
                     );
-
-                    // Clear canvas
-                    context.clearRect(0, 0, canvas.width, canvas.height);
 
                     // Draw rectangle on top of the person if detected
                     if (hasPerson) {
