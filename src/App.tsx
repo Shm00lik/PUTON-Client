@@ -8,6 +8,8 @@ import RegisterView from "./views/register/Register";
 import WishlistView from "./views/wishlist/Wishlist";
 import ProductView from "./views/product/Product";
 import ARScene from "./views/test/Test";
+import Ping from "./views/test/Ping";
+
 import { useEffect, useState } from "react";
 import { Client, Response } from "./utils/Protocol";
 
@@ -38,6 +40,7 @@ export const enum RouteOptions {
     WISHLIST = "/wishlist",
     PRODUCT = "/product/:id",
     TEST = "/test",
+    PING = "/ping",
 }
 
 export const route = function (
@@ -101,6 +104,7 @@ function App() {
                             element={<ProductView />}
                         />
                         <Route path={RouteOptions.TEST} element={<ARScene />} />
+                        <Route path={RouteOptions.PING} element={<Ping />} />
                     </Routes>
                 </BrowserRouter>
             </CssBaseline>

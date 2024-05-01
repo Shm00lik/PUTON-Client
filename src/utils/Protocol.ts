@@ -34,7 +34,18 @@ export class Client {
             },
         });
     }
-            
+
+    public static async ping(): Promise<Response> {
+        let response = await this.request("/ping", "POST");
+
+        return new Response(
+            response.status,
+            response.ok,
+            await response.text(),
+            response.url
+        );
+    }
+
     public static async me(): Promise<Response> {
         let response = await this.request("/me", "GET");
 
@@ -47,8 +58,12 @@ export class Client {
     }
 
     public static async login(formData: LoginData): Promise<Response> {
-        let response = await this.request("/login", "POST", JSON.stringify(formData));
-        
+        let response = await this.request(
+            "/login",
+            "POST",
+            JSON.stringify(formData)
+        );
+
         return new Response(
             response.status,
             response.ok,
@@ -58,7 +73,11 @@ export class Client {
     }
 
     public static async register(formData: RegisterData): Promise<Response> {
-        let response = await this.request("/register", "POST", JSON.stringify(formData))
+        let response = await this.request(
+            "/register",
+            "POST",
+            JSON.stringify(formData)
+        );
 
         return new Response(
             response.status,
@@ -75,7 +94,7 @@ export class Client {
     }
 
     public static async wishlist(): Promise<Product[]> {
-        let response = await this.request("/wishlist", "GET")
+        let response = await this.request("/wishlist", "GET");
 
         let parsedResponse: Response = new Response(
             response.status,
@@ -108,7 +127,7 @@ export class Client {
     public static async product(
         id: Number | string | null
     ): Promise<Product | null> {
-        let response = await this.request("/product/" + id, "GET")
+        let response = await this.request("/product/" + id, "GET");
 
         let parsedResponse = new Response(
             response.status,
