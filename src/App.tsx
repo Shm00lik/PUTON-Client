@@ -7,6 +7,7 @@ import LoginView from "./views/login/Login";
 import RegisterView from "./views/register/Register";
 import WishlistView from "./views/wishlist/Wishlist";
 import ProductView from "./views/product/Product";
+import ARScene from "./views/test/Test";
 import { useEffect, useState } from "react";
 import { Client, Response } from "./utils/Protocol";
 
@@ -36,6 +37,7 @@ export const enum RouteOptions {
     REGISTER = "/register",
     WISHLIST = "/wishlist",
     PRODUCT = "/product/:id",
+    TEST = "/test",
 }
 
 export const route = function (
@@ -98,6 +100,7 @@ function App() {
                             path={RouteOptions.PRODUCT}
                             element={<ProductView />}
                         />
+                        <Route path={RouteOptions.TEST} element={<ARScene />} />
                     </Routes>
                 </BrowserRouter>
             </CssBaseline>
