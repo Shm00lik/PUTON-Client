@@ -12,7 +12,7 @@ export interface RegisterData {
 }
 
 export class Client {
-    public static HOST: string = "http://localhost";
+    public static HOST: string = "http://192.168.1.37";
     public static PORT: number = 3339;
     public static baseURL: string = `${Client.HOST}:${Client.PORT}`;
 

@@ -9,9 +9,12 @@ import WishlistView from "./views/wishlist/Wishlist";
 import ProductView from "./views/product/Product";
 import ARScene from "./views/test/Test";
 import Ping from "./views/test/Ping";
+import mainPose from "./views/test/MainPOSE";
+import PoseDetectionComponent from "./components/PoseDetection";
 
 import { useEffect, useState } from "react";
 import { Client, Response } from "./utils/Protocol";
+import { Pose } from "@tensorflow-models/pose-detection";
 
 const darkTheme = createTheme({
     typography: {
@@ -40,6 +43,7 @@ export const enum RouteOptions {
     WISHLIST = "/wishlist",
     PRODUCT = "/product/:id",
     TEST = "/test",
+    TEST_AR = "/test/ar",
     PING = "/ping",
 }
 
@@ -104,6 +108,16 @@ function App() {
                             element={<ProductView />}
                         />
                         <Route path={RouteOptions.TEST} element={<ARScene />} />
+                        <Route
+                            path={RouteOptions.TEST_AR}
+                            element={
+                                <PoseDetectionComponent
+                                    onDetection={(pose: Pose) => {
+                                        console.log(pose.score);
+                                    }}
+                                />
+                            }
+                        />
                         <Route path={RouteOptions.PING} element={<Ping />} />
                     </Routes>
                 </BrowserRouter>
