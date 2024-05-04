@@ -40,8 +40,7 @@ const RegisterView = () => {
             return;
         }
 
-        localStorage.setItem("username", formData.username);
-        localStorage.setItem("password", formData.password);
+        localStorage.setItem("token", result.body.message.token);
 
         handleAlert(result.body.message, "success");
 

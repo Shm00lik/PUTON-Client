@@ -40,7 +40,7 @@ const LoginView = () => {
         }
 
         localStorage.setItem("token", result.body.message.token);
-        
+
         handleAlert(result.body.message, "success");
 
         route(RouteOptions.HOME);
