@@ -1,6 +1,5 @@
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import "./App.css";
 import Appbar from "./components/Appbar";
 import HomeView from "./views/home/Home";
 import LoginView from "./views/login/Login";
@@ -9,10 +8,10 @@ import WishlistView from "./views/wishlist/Wishlist";
 import ProductView from "./views/product/Product";
 import ARScene from "./views/test/Test";
 import Ping from "./views/test/Ping";
-import mainPose from "./views/test/MainPOSE";
+import MainTest from "./views/test/MainPOSE";
 import PoseDetectionComponent from "./components/PoseDetection";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Client, Response } from "./utils/Protocol";
 import { Pose } from "@tensorflow-models/pose-detection";
 
@@ -112,9 +111,7 @@ function App() {
                             path={RouteOptions.TEST_AR}
                             element={
                                 <PoseDetectionComponent
-                                    onDetection={(pose: Pose) => {
-                                        console.log(pose.score);
-                                    }}
+                                    onDetection={() => {}}
                                 />
                             }
                         />
