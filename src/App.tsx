@@ -8,12 +8,10 @@ import WishlistView from "./views/wishlist/Wishlist";
 import ProductView from "./views/product/Product";
 import ARScene from "./views/test/Test";
 import Ping from "./views/test/Ping";
-import MainTest from "./views/test/MainPOSE";
-import PoseDetectionComponent from "./components/PoseDetection";
+import PoseDetectionComponent from "./components/PoseDetection"
 
 import { useEffect } from "react";
 import { Client, Response } from "./utils/Protocol";
-import { Pose } from "@tensorflow-models/pose-detection";
 
 const darkTheme = createTheme({
     typography: {
