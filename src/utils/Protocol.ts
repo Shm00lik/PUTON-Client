@@ -145,7 +145,11 @@ export class Client {
             parsedResponse.body.message.title,
             parsedResponse.body.message.description,
             parsedResponse.body.message.price,
-            parsedResponse.body.message.image
+            parsedResponse.body.message.image,
+            parsedResponse.body.message.leftEyeX,
+            parsedResponse.body.message.leftEyeY,
+            parsedResponse.body.message.rightEyeX,
+            parsedResponse.body.message.rightEyeY
         );
     }
 }

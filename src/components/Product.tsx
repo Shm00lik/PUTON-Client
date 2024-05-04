@@ -27,7 +27,7 @@ const ProductComponent = ({ product }: Props) => {
             >
                 <h1>{product.title}</h1>
 
-                <Image src={product.image} />
+                <Image src={product.image.src} />
 
                 <p style={{ color: "grey" }}>{product.description}</p>
 
@@ -46,7 +46,7 @@ const ProductComponent = ({ product }: Props) => {
             >
                 <CardMedia
                     sx={{ height: 140 }}
-                    image={product.image}
+                    image={product.image.src}
                     title={product.title}
                 />
 

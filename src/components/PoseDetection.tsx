@@ -1,27 +1,33 @@
 import { useEffect, useRef, useState } from "react";
 import * as posenet from "@tensorflow-models/pose-detection";
 import * as tf from "@tensorflow/tfjs"; // Import TensorFlow.js library
+import { Product } from "../utils/Product";
+import { MovingAverage } from "../utils/Utils";
 
 // Define the keypoints for the shirt (adjust as needed)
-const SHIRT_KEYPOINTS = {
-    leftShoulder: "left_ear",
-    rightShoulder: "right_ear",
-    leftHip: "left_ear",
-    rightHip: "right_ear",
+const KEYPOINTS = {
+    leftEye: "left_eye",
+    rightEye: "right_eye",
 };
 
-const RATIO = 0.34;
-
 interface Props {
-    onDetection: (poses: posenet.Pose) => void;
+    product: Product | null;
 }
 
-const PoseDetectionComponent = ({ onDetection }: Props) => {
+const movingAverageRX = new MovingAverage(5);
+const movingAverageRY = new MovingAverage(5);
+const movingAverageLX = new MovingAverage(5);
+const movingAverageLY = new MovingAverage(5);
+
+const PoseDetectionComponent = ({ product }: Props) => {
+    if (!product) {
+        return null;
+    }
+
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [net, setNet] = useState<posenet.PoseDetector>();
     const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
-    const [image, setImage] = useState<HTMLImageElement>();
 
     useEffect(() => {
         const loadPoseNet = async () => {
@@ -52,8 +58,6 @@ const PoseDetectionComponent = ({ onDetection }: Props) => {
     }, []);
 
     useEffect(() => {
-        if (!videoRef.current) return;
-
         navigator.mediaDevices
             .getUserMedia({ video: {} })
             .then((stream) => {
@@ -64,11 +68,6 @@ const PoseDetectionComponent = ({ onDetection }: Props) => {
                     videoRef.current!.height = videoRef.current!.videoHeight;
                     canvasRef.current!.width = videoRef.current!.videoWidth;
                     canvasRef.current!.height = videoRef.current!.videoHeight;
-                    console.log(
-                        videoRef.current!.width,
-                        videoRef.current!.videoWidth,
-                        canvasRef.current!.width
-                    );
                 };
             })
             .catch((error) => {
@@ -84,13 +83,6 @@ const PoseDetectionComponent = ({ onDetection }: Props) => {
         if (context) {
             setCtx(context);
         }
-
-        let image = new Image();
-        image.src = "/glasses.png";
-        image.onload = () => {
-            setImage(image);
-            console.warn("Image loaded");
-        };
     }, []);
 
     useEffect(() => {
@@ -109,29 +101,38 @@ const PoseDetectionComponent = ({ onDetection }: Props) => {
                     (a, b) => b.score! - a.score!
                 )[0];
 
-                onDetection(finalPose);
-                // console.log(finalPose);
-
                 // Clear canvas
                 ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
                 // Draw keypoints
-                finalPose.keypoints.forEach(({ x, y }) => {
+                finalPose.keypoints.forEach(({ x, y, name }) => {
+                    if (name === KEYPOINTS.leftEye) {
+                        movingAverageLX.add(x);
+                        movingAverageLY.add(y);
+                    }
+
+                    if (name === KEYPOINTS.rightEye) {
+                        movingAverageRX.add(x);
+                        movingAverageRY.add(y);
+                    }
+
                     ctx.beginPath();
                     ctx.arc(x, y, 5, 0, Math.PI * 2);
                     ctx.fillStyle = "#FF0000";
                     ctx.fill();
                 });
 
-                if (image) {
-                    console.warn("Adding image");
-                    const style = getImageParams(finalPose.keypoints);
-                    ctx.drawImage(
-                        image,
-                        style.left,
-                        style.top,
-                        style.width,
-                        style.height
+                if (product.image) {
+                    const imageParams = getImageParams(finalPose.keypoints);
+
+                    drawImage(
+                        ctx,
+                        product.image,
+                        imageParams.pointOnImage,
+                        imageParams.pointOnCanvas,
+                        imageParams.width,
+                        imageParams.height,
+                        imageParams.angle
                     );
                 }
             } catch (error) {
@@ -142,59 +143,107 @@ const PoseDetectionComponent = ({ onDetection }: Props) => {
         };
 
         detectPose();
-    }, [net, ctx, onDetection]);
+    }, [net, ctx]);
 
     const getImageParams = (
         poseData: posenet.Keypoint[]
     ): {
         width: number;
         height: number;
-        top: number;
-        left: number;
-        transform: number;
+        pointOnImage: { x: number; y: number };
+        pointOnCanvas: { x: number; y: number };
+        angle: number;
     } => {
-        // Calculate shirt position based on pose data
-        const leftShoulder = poseData.find(
-            (keypoint) => keypoint.name === SHIRT_KEYPOINTS.leftShoulder
-        );
-        const rightShoulder = poseData.find(
-            (keypoint) => keypoint.name === SHIRT_KEYPOINTS.rightShoulder
-        );
-        const leftHip = poseData.find(
-            (keypoint) => keypoint.name === SHIRT_KEYPOINTS.leftHip
-        );
-        const rightHip = poseData.find(
-            (keypoint) => keypoint.name === SHIRT_KEYPOINTS.rightHip
-        );
+        // Calculate glasses position based on pose data
+        const leftEye = {
+            x: movingAverageLX.calculate(),
+            y: movingAverageLY.calculate(),
+        };
 
-        if (leftShoulder && rightShoulder && leftHip && rightHip) {
-            const shirtWidth = Math.abs(rightShoulder.x - leftShoulder.x) * 1;
-            const shirtHeight = Math.abs(rightShoulder.y - leftHip.y) * 1;
+        const rightEye = {
+            x: movingAverageRX.calculate(),
+            y: movingAverageRY.calculate(),
+        };
 
-            const shirtTop = Math.min(leftShoulder.y, rightShoulder.y);
-            const shirtLeft = Math.min(leftShoulder.x, rightShoulder.x);
+        if (leftEye && rightEye) {
+            const detectedEyeToEye = Math.hypot(
+                leftEye.x - rightEye.x,
+                leftEye.y - rightEye.y
+            );
 
-            const shirtRotation = Math.atan2(
-                rightShoulder.y - leftShoulder.y,
-                rightShoulder.x - leftShoulder.x
+            const imageEyesWidth = Math.hypot(
+                product.leftEye.x - product.rightEye.x,
+                product.leftEye.y - product.rightEye.y
+            );
+
+            const ratio = detectedEyeToEye / imageEyesWidth;
+
+            const rotation = Math.atan2(
+                leftEye.y - rightEye.y,
+                leftEye.x - rightEye.x
             );
 
             return {
-                width: shirtWidth,
-                height: RATIO * shirtWidth,
-                top: shirtTop,
-                left: shirtLeft,
-                transform: shirtRotation,
+                width: ratio * product.image.width,
+                height: ratio * product.image.height,
+                pointOnImage: {
+                    x: (product.rightEye.x + product.leftEye.x) / 2,
+                    y: (product.rightEye.y + product.leftEye.y) / 2,
+                },
+                pointOnCanvas: {
+                    x: (rightEye.x + leftEye.x) / 2,
+                    y: (rightEye.y + leftEye.y) / 2,
+                },
+                angle: rotation,
             };
         }
 
         return {
             width: 0,
             height: 0,
-            top: 0,
-            left: 0,
-            transform: 0,
+            pointOnImage: {
+                x: 0,
+                y: 0,
+            },
+            pointOnCanvas: {
+                x: 0,
+                y: 0,
+            },
+            angle: 0,
         };
+    };
+
+    const drawImage = (
+        ctx: CanvasRenderingContext2D,
+        image: HTMLImageElement,
+        pointOnImage: { x: number; y: number },
+        pointOnCanvas: { x: number; y: number },
+        width: number,
+        height: number,
+        angle: number
+    ) => {
+        // Save the current transformation matrix
+        ctx.save();
+
+        // Translate the canvas origin to the desired position on the canvas
+        ctx.translate(pointOnCanvas.x, pointOnCanvas.y);
+
+        // Rotate the canvas context by the desired angle
+        ctx.rotate(angle);
+
+        // Calculate the scale factors to fit the image to the desired width and height
+        const scaleX = width / image.width;
+        const scaleY = height / image.height;
+
+        // Calculate the position of the image point relative to the canvas point
+        const offsetX = pointOnImage.x * scaleX - width; // Offset of the image point from the center of the scaled image
+        const offsetY = pointOnImage.y * scaleY - height; // Offset of the image point from the center of the scaled image
+
+        // Draw the scaled and rotated image at the desired position on the canvas
+        ctx.drawImage(image, offsetX, offsetY, width, height);
+
+        // Restore the original transformation matrix
+        ctx.restore();
     };
 
     return (

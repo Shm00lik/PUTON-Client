@@ -7,7 +7,6 @@ import RegisterView from "./views/register/Register";
 import WishlistView from "./views/wishlist/Wishlist";
 import ProductView from "./views/product/Product";
 import Ping from "./views/test/Ping";
-import PoseDetectionComponent from "./components/PoseDetection";
 
 import { useEffect } from "react";
 import { Client, Response } from "./utils/Protocol";
@@ -38,7 +37,6 @@ export const enum RouteOptions {
     REGISTER = "/register",
     WISHLIST = "/wishlist",
     PRODUCT = "/product/:id",
-    TEST_AR = "/test/ar",
     PING = "/ping",
 }
 
@@ -101,14 +99,6 @@ function App() {
                         <Route
                             path={RouteOptions.PRODUCT}
                             element={<ProductView />}
-                        />
-                        <Route
-                            path={RouteOptions.TEST_AR}
-                            element={
-                                <PoseDetectionComponent
-                                    onDetection={() => {}}
-                                />
-                            }
                         />
                         <Route path={RouteOptions.PING} element={<Ping />} />
                     </Routes>
