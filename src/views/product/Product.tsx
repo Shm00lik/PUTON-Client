@@ -23,6 +23,7 @@ const ProductView = () => {
     return (
         <>
             <PoseDetectionComponent product={product} />
+            <ProductComponent product={product} />
         </>
     );
 };

@@ -116,7 +116,8 @@ export class Client {
                     product.title,
                     product.description,
                     product.price,
-                    product.image
+                    product.image,
+                    product.inWishlist
                 )
             );
         });
@@ -146,10 +147,28 @@ export class Client {
             parsedResponse.body.message.description,
             parsedResponse.body.message.price,
             parsedResponse.body.message.image,
+            parsedResponse.body.message.inWishlist,
             parsedResponse.body.message.leftEyeX,
             parsedResponse.body.message.leftEyeY,
             parsedResponse.body.message.rightEyeX,
             parsedResponse.body.message.rightEyeY
+        );
+    }
+
+    public static async wishlistProduct(product: Product): Promise<Response> {
+        let response = await this.request(
+            "/wishlistProduct",
+            "POST",
+            JSON.stringify({
+                id: product.id,
+            })
+        );
+
+        return new Response(
+            response.status,
+            response.ok,
+            await response.text(),
+            response.url
         );
     }
 }

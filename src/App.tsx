@@ -7,8 +7,6 @@ import RegisterView from "./views/register/Register";
 import WishlistView from "./views/wishlist/Wishlist";
 import ProductView from "./views/product/Product";
 import Ping from "./views/test/Ping";
-
-import { useEffect } from "react";
 import { Client, Response } from "./utils/Protocol";
 
 const darkTheme = createTheme({
@@ -54,24 +52,22 @@ export const route = function (
 };
 
 function App() {
-    useEffect(() => {
+    const runThis = async () => {
         if (
             window.location.pathname == RouteOptions.LOGIN ||
             window.location.pathname == RouteOptions.REGISTER
         )
             return;
 
-        const runThis = async () => {
-            let result: Response = await Client.me();
+        let result: Response = await Client.me();
 
-            if (!result.body.success) {
-                route(RouteOptions.LOGIN);
-                return;
-            }
-        };
+        if (!result.body.success) {
+            route(RouteOptions.LOGIN);
+            return;
+        }
+    };
 
-        runThis();
-    }, [window.location.href]);
+    runThis();
 
     return (
         <ThemeProvider theme={darkTheme}>

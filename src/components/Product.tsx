@@ -1,8 +1,8 @@
-import { Card, CardContent, CardMedia, Typography } from "@mui/material";
-import { Product } from "../utils/Product";
+import { CardContent, CardMedia, Typography } from "@mui/material";
+import { Card, Button, Col, Image, Modal, Row } from "antd";
 import { useState } from "react";
-import { Modal, Image, Button } from "antd";
 import { RouteOptions, route } from "../App";
+import { Product } from "../utils/Product";
 
 interface Props {
     product: Product | null;
@@ -36,14 +36,11 @@ const ProductComponent = ({ product }: Props) => {
                         route(RouteOptions.PRODUCT, { id: product.id })
                     }
                 >
-                    View Product
+                    TRY IT!
                 </Button>
             </Modal>
 
-            <Card
-                sx={{ width: 240, margin: 2 }}
-                onClick={() => setShowOverlay(true)}
-            >
+            <Card hoverable onClick={() => setShowOverlay(true)}>
                 <CardMedia
                     sx={{ height: 140 }}
                     image={product.image.src}
@@ -51,13 +48,13 @@ const ProductComponent = ({ product }: Props) => {
                 />
 
                 <CardContent>
-                    <Typography gutterBottom variant="h5" component="div">
-                        {product.title}
-                    </Typography>
-
-                    <Typography color="text.secondary">
-                        {product.description}
-                    </Typography>
+                    <Row>
+                        <Col>
+                            <h2>{product.title}</h2>
+                        </Col>
+                        <Col>hi</Col>
+                    </Row>
+                    {product.description}
                 </CardContent>
             </Card>
         </>
