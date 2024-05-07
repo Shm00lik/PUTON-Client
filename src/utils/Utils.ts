@@ -26,4 +26,25 @@ export class MovingAverage {
             return this.sum / this.windowSize;
         }
     }
+
+    public reset(): void {
+        this.data = [];
+        this.sum = 0;
+    }
+}
+
+export enum Color {
+    RED = "#cf3030",
+    GREEN = "#51b52d",
+    PRIMARY = "#15a288",
+}
+
+export class MeData {
+    username: string;
+    email: string;
+
+    constructor(username: string, email: string) {
+        this.username = username;
+        this.email = email;
+    }
 }

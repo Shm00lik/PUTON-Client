@@ -1,28 +1,17 @@
-import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Appbar from "./components/Appbar";
-import HomeView from "./views/home/Home";
-import LoginView from "./views/login/Login";
-import RegisterView from "./views/register/Register";
-import WishlistView from "./views/wishlist/Wishlist";
-import ProductView from "./views/product/Product";
-import Ping from "./views/test/Ping";
+import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { Client, Response } from "./utils/Protocol";
+import HomeView from "./views/home/HomeView";
+import LoginView from "./views/login/LoginView";
+import RegisterView from "./views/register/RegisterView";
+import PingView from "./views/test/Ping";
+import ProductView from "./views/product/ProductView";
+import { MeData } from "./utils/Utils";
 
-const darkTheme = createTheme({
+const theme = createTheme({
     typography: {
         fontFamily: "Heebo",
-    },
-
-    palette: {
-        mode: "dark",
-
-        primary: {
-            main: "#18A48C",
-        },
-        secondary: {
-            main: "#42B8A3",
-        },
     },
 });
 
@@ -36,6 +25,7 @@ export const enum RouteOptions {
     WISHLIST = "/wishlist",
     PRODUCT = "/product/:id",
     PING = "/ping",
+    NOT_FOUND = "*",
 }
 
 export const route = function (
@@ -59,9 +49,9 @@ function App() {
         )
             return;
 
-        let result: Response = await Client.me();
+        let result: MeData | null = await Client.me();
 
-        if (!result.body.success) {
+        if (result == null) {
             route(RouteOptions.LOGIN);
             return;
         }
@@ -70,37 +60,45 @@ function App() {
     runThis();
 
     return (
-        <ThemeProvider theme={darkTheme}>
-            <CssBaseline>
-                <Appbar />
+        <div className="portraitScreen">
+            <ThemeProvider theme={theme}>
+                <CssBaseline>
+                    <BrowserRouter>
+                        <Routes>
+                            <Route
+                                path={RouteOptions.HOME}
+                                element={<HomeView />}
+                            />
 
-                <BrowserRouter>
-                    <Routes>
-                        <Route
-                            path={RouteOptions.HOME}
-                            element={<HomeView />}
-                        />
-                        <Route
-                            path={RouteOptions.LOGIN}
-                            element={<LoginView />}
-                        />
-                        <Route
-                            path={RouteOptions.REGISTER}
-                            element={<RegisterView />}
-                        />
-                        <Route
-                            path={RouteOptions.WISHLIST}
-                            element={<WishlistView />}
-                        />
-                        <Route
-                            path={RouteOptions.PRODUCT}
-                            element={<ProductView />}
-                        />
-                        <Route path={RouteOptions.PING} element={<Ping />} />
-                    </Routes>
-                </BrowserRouter>
-            </CssBaseline>
-        </ThemeProvider>
+                            <Route
+                                path={RouteOptions.LOGIN}
+                                element={<LoginView />}
+                            />
+
+                            <Route
+                                path={RouteOptions.REGISTER}
+                                element={<RegisterView />}
+                            />
+
+                            <Route
+                                path={RouteOptions.PRODUCT}
+                                element={<ProductView />}
+                            />
+
+                            <Route
+                                path={RouteOptions.PING}
+                                element={<PingView />}
+                            />
+
+                            <Route
+                                path={RouteOptions.NOT_FOUND}
+                                element={<HomeView />}
+                            />
+                        </Routes>
+                    </BrowserRouter>
+                </CssBaseline>
+            </ThemeProvider>
+        </div>
     );
 }
 

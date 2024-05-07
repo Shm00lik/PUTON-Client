@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import * as posenet from "@tensorflow-models/pose-detection";
 import * as tf from "@tensorflow/tfjs"; // Import TensorFlow.js library
 import { Product } from "../utils/Product";
 import { MovingAverage } from "../utils/Utils";
+
+const MIN_DETECTION_SCORE = 0.25;
 
 // Define the keypoints for the shirt (adjust as needed)
 const KEYPOINTS = {
@@ -11,7 +13,11 @@ const KEYPOINTS = {
 };
 
 interface Props {
-    product: Product | null;
+    product: Product;
+    FPS: number;
+    videoRef: RefObject<HTMLVideoElement>;
+    canvasRef: RefObject<HTMLCanvasElement>;
+    forceStop: boolean;
 }
 
 const movingAverageRX = new MovingAverage(5);
@@ -19,18 +25,20 @@ const movingAverageRY = new MovingAverage(5);
 const movingAverageLX = new MovingAverage(5);
 const movingAverageLY = new MovingAverage(5);
 
-const PoseDetectionComponent = ({ product }: Props) => {
-    if (!product) {
-        return null;
-    }
-
-    const videoRef = useRef<HTMLVideoElement>(null);
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+const PoseDetectionComponent = ({
+    product,
+    FPS,
+    videoRef,
+    canvasRef,
+    forceStop,
+}: Props) => {
     const [net, setNet] = useState<posenet.PoseDetector>();
     const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
+    const [detect, setDetect] = useState<posenet.Pose>();
 
     useEffect(() => {
         const loadPoseNet = async () => {
+            console.log("LOADINGGG");
             await tf.ready();
 
             const net = await posenet.createDetector(
@@ -40,7 +48,7 @@ const PoseDetectionComponent = ({ product }: Props) => {
                     architecture: "MobileNetV1",
                     outputStride: 16,
                     inputResolution: { width: 500, height: 500 },
-                    multiplier: 0.75,
+                    multiplier: 0.5,
                 }
             );
 
@@ -49,7 +57,6 @@ const PoseDetectionComponent = ({ product }: Props) => {
 
         loadPoseNet();
 
-        // Cleanup function
         return () => {
             if (net) {
                 net.dispose(); // Dispose the model when the component unmounts
@@ -59,7 +66,9 @@ const PoseDetectionComponent = ({ product }: Props) => {
 
     useEffect(() => {
         navigator.mediaDevices
-            .getUserMedia({ video: {} })
+            .getUserMedia({
+                video: {},
+            })
             .then((stream) => {
                 videoRef.current!.srcObject = stream;
                 videoRef.current!.onloadedmetadata = () => {
@@ -86,26 +95,32 @@ const PoseDetectionComponent = ({ product }: Props) => {
     }, []);
 
     useEffect(() => {
+        if (forceStop) return;
+
         const detectPose = async () => {
             if (!net || !videoRef.current || !ctx) return;
 
             const video = videoRef.current;
 
             try {
-                const poses = await net.estimatePoses(video, {
-                    maxPoses: 1,
-                    flipHorizontal: false,
-                });
-
-                const finalPose = [...poses].sort(
-                    (a, b) => b.score! - a.score!
+                const detected = (
+                    await net.estimatePoses(video, {
+                        maxPoses: 1,
+                        flipHorizontal: false,
+                    })
                 )[0];
+
+                setDetect(detected);
 
                 // Clear canvas
                 ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
+                if (!detected.score || detected.score < MIN_DETECTION_SCORE) {
+                    return;
+                }
+
                 // Draw keypoints
-                finalPose.keypoints.forEach(({ x, y, name }) => {
+                detected.keypoints.forEach(({ x, y, name }) => {
                     if (name === KEYPOINTS.leftEye) {
                         movingAverageLX.add(x);
                         movingAverageLY.add(y);
@@ -115,15 +130,10 @@ const PoseDetectionComponent = ({ product }: Props) => {
                         movingAverageRX.add(x);
                         movingAverageRY.add(y);
                     }
-
-                    ctx.beginPath();
-                    ctx.arc(x, y, 5, 0, Math.PI * 2);
-                    ctx.fillStyle = "#FF0000";
-                    ctx.fill();
                 });
 
                 if (product.image) {
-                    const imageParams = getImageParams(finalPose.keypoints);
+                    const imageParams = getImageParams();
 
                     drawImage(
                         ctx,
@@ -136,18 +146,21 @@ const PoseDetectionComponent = ({ product }: Props) => {
                     );
                 }
             } catch (error) {
-                console.error("Pose estimation error:", error);
+                console.log("Pose estimation error:", error);
             }
-
-            requestAnimationFrame(detectPose);
         };
 
-        detectPose();
-    }, [net, ctx]);
+        const intervalId = setInterval(() => {
+            detectPose();
+        }, 1000 / FPS);
 
-    const getImageParams = (
-        poseData: posenet.Keypoint[]
-    ): {
+        return () => {
+            clearInterval(intervalId);
+            reset();
+        };
+    }, [product, forceStop]);
+
+    const getImageParams = (): {
         width: number;
         height: number;
         pointOnImage: { x: number; y: number };
@@ -236,8 +249,8 @@ const PoseDetectionComponent = ({ product }: Props) => {
         const scaleY = height / image.height;
 
         // Calculate the position of the image point relative to the canvas point
-        const offsetX = pointOnImage.x * scaleX - width; // Offset of the image point from the center of the scaled image
-        const offsetY = pointOnImage.y * scaleY - height; // Offset of the image point from the center of the scaled image
+        const offsetX = -pointOnImage.x * scaleX; // Offset of the image point from the center of the scaled image
+        const offsetY = -pointOnImage.y * scaleY; // Offset of the image point from the center of the scaled image
 
         // Draw the scaled and rotated image at the desired position on the canvas
         ctx.drawImage(image, offsetX, offsetY, width, height);
@@ -246,26 +259,15 @@ const PoseDetectionComponent = ({ product }: Props) => {
         ctx.restore();
     };
 
-    return (
-        <div style={{ position: "relative" }}>
-            <video
-                ref={videoRef}
-                style={{ maxWidth: "100%" }}
-                width={100}
-                height={500}
-                autoPlay
-            />
-            <canvas
-                ref={canvasRef}
-                style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    maxWidth: "100%",
-                }}
-            />
-        </div>
-    );
+    const reset = () => {
+        movingAverageLX.reset();
+        movingAverageLY.reset();
+        movingAverageRX.reset();
+        movingAverageRY.reset();
+        ctx?.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    };
+
+    return <>{detect?.score}</>;
 };
 
 export default PoseDetectionComponent;

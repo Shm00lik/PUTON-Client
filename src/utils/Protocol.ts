@@ -1,4 +1,5 @@
 import { Product } from "./Product";
+import { MeData } from "./Utils";
 
 export interface LoginData {
     username: string;
@@ -46,14 +47,23 @@ export class Client {
         );
     }
 
-    public static async me(): Promise<Response> {
+    public static async me(): Promise<MeData | null> {
         let response = await this.request("/me", "GET");
 
-        return new Response(
+        let parsedResponse = new Response(
             response.status,
             response.ok,
             await response.text(),
             response.url
+        );
+
+        if (!parsedResponse.body.success) {
+            return null;
+        }
+
+        return new MeData(
+            parsedResponse.body.message.username,
+            parsedResponse.body.message.email
         );
     }
 
@@ -125,9 +135,7 @@ export class Client {
         return products;
     }
 
-    public static async product(
-        id: Number | string | null
-    ): Promise<Product | null> {
+    public static async product(id: number | string): Promise<Product | null> {
         let response = await this.request("/product/" + id, "GET");
 
         let parsedResponse = new Response(
@@ -170,6 +178,48 @@ export class Client {
             await response.text(),
             response.url
         );
+    }
+
+    public static async products(
+        amount: number,
+        page: number
+    ): Promise<Product[]> {
+        let response = await this.request(
+            `/products?amount=${amount}&page=${page}`,
+            "GET"
+        );
+
+        let parsedResponse: Response = new Response(
+            response.status,
+            response.ok,
+            await response.text(),
+            response.url
+        );
+
+        let products: Product[] = [];
+
+        if (!parsedResponse.body.success) {
+            return products;
+        }
+
+        parsedResponse.body.message.forEach((product: any) => {
+            products.push(
+                new Product(
+                    product.productID,
+                    product.title,
+                    product.description,
+                    product.price,
+                    product.image,
+                    product.inWishlist,
+                    product.leftEyeX,
+                    product.leftEyeY,
+                    product.rightEyeX,
+                    product.rightEyeY
+                )
+            );
+        });
+
+        return products;
     }
 }
 

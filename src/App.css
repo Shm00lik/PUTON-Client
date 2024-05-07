@@ -1,0 +1,15 @@
+/* Base styles */
+.portraitScreen {
+    width: 100%;
+    margin: 0 auto;
+    background-color: #333339;
+}
+
+/* Media query for screens larger than 500px (desktop) */
+@media (min-width: 500px) {
+    .portraitScreen {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+}
+

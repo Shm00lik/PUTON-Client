@@ -1,12 +1,10 @@
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Client } from "../../utils/Protocol";
+import { route, RouteOptions } from "../../App";
 import { Product } from "../../utils/Product";
-import { useEffect, useState } from "react";
-import ProductComponent from "../../components/Product";
-import { RouteOptions, route } from "../../App";
-import { Affix, Col, Row } from "antd";
-import "./Product.css";
-import PoseDetectionComponent from "../../components/PoseDetection";
+import { Client } from "../../utils/Protocol";
+import { Image } from "antd";
+
 const ProductView = () => {
     const { id } = useParams<string>();
 
@@ -20,10 +18,15 @@ const ProductView = () => {
         Client.product(Number(id)).then((p) => setProduct(p));
     }, []);
 
+    if (product == null) {
+        return <>Loading...</>;
+    }
+
     return (
         <>
-            <PoseDetectionComponent product={product} />
-            <ProductComponent product={product} />
+            <h1>{product.title}</h1>
+            <Image src={product.image.src} />
+            <h2>{product.description}</h2>
         </>
     );
 };
