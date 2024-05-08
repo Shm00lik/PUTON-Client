@@ -8,6 +8,7 @@ import RegisterView from "./views/register/RegisterView";
 import PingView from "./views/test/Ping";
 import ProductView from "./views/product/ProductView";
 import { MeData } from "./utils/Utils";
+import Test from "./views/test/Test";
 
 const theme = createTheme({
     typography: {
@@ -26,6 +27,7 @@ export const enum RouteOptions {
     PRODUCT = "/product/:id",
     PING = "/ping",
     NOT_FOUND = "*",
+    TEST = "/test",
 }
 
 export const route = function (
@@ -88,6 +90,11 @@ function App() {
                             <Route
                                 path={RouteOptions.PING}
                                 element={<PingView />}
+                            />
+
+                            <Route
+                                path={RouteOptions.TEST}
+                                element={<Test />}
                             />
 
                             <Route

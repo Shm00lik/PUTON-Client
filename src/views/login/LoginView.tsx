@@ -10,13 +10,16 @@ import { FormEvent, useState } from "react";
 import {
     MIN_PASSWORD_LENGTH,
     MIN_USERNAME_LENGTH,
-    route,
     RouteOptions,
+    route,
 } from "../../App";
-import { Client, LoginData, Response } from "../../utils/Protocol";
+import { Client, Response } from "../../utils/Protocol";
 
 const LoginView = () => {
-    const [formData, setFormData] = useState<LoginData>({
+    const [formData, setFormData] = useState<{
+        username: string;
+        password: string;
+    }>({
         username: "yali1234",
         password: "yali1234",
     });
@@ -32,7 +35,10 @@ const LoginView = () => {
     const handleLogin = async (event: FormEvent) => {
         event.preventDefault();
 
-        let result: Response = await Client.login(formData);
+        let result: Response = await Client.login(
+            formData.username,
+            formData.password
+        );
 
         if (!result.body.success) {
             handleAlert(result.body.message, "error");

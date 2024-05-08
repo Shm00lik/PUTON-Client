@@ -13,10 +13,14 @@ import {
     route,
     RouteOptions,
 } from "../../App";
-import { Client, RegisterData, Response } from "../../utils/Protocol";
+import { Client, Response } from "../../utils/Protocol";
 
 const RegisterView = () => {
-    const [formData, setFormData] = useState<RegisterData>({
+    const [formData, setFormData] = useState<{
+        email: string;
+        username: string;
+        password: string;
+    }>({
         email: "yali@yali.com",
         username: "yali1234",
         password: "yali1234",
@@ -33,7 +37,11 @@ const RegisterView = () => {
     const handleRegister = async (event: FormEvent) => {
         event.preventDefault();
 
-        let result: Response = await Client.register(formData);
+        let result: Response = await Client.register(
+            formData.email,
+            formData.username,
+            formData.password
+        );
 
         if (!result.body.success) {
             handleAlert(result.body.message, "error");

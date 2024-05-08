@@ -1,29 +1,32 @@
 import { Product } from "./Product";
 import { MeData } from "./Utils";
-
-export interface LoginData {
-    username: string;
-    password: string;
-}
-
-export interface RegisterData {
-    email: string;
-    username: string;
-    password: string;
-}
+import Encryption from "./encryption/Encryption";
 
 export class Client {
     public static HOST: string = "http://192.168.1.37";
     public static PORT: number = 3339;
     public static baseURL: string = `${Client.HOST}:${Client.PORT}`;
+    public static encryption: Encryption = new Encryption();
+
+    public static async initializeEncryption() {
+        await Client.encryption.initialize();
+        await Client.encryption.exchange();
+
+        if (Client.encryption.isReady) {
+            console.warn(Client.encryption.sharedKey);
+        }
+
+        console.log(await this.me());
+    }
 
     private static async request(url: string, method: string, body?: string) {
         if (method == "POST") {
             return await fetch(Client.baseURL + url, {
                 method: method,
-                body: body,
+                body: body ? body : null,
                 headers: {
                     token: localStorage.getItem("token") || "",
+                    encryptionToken: Client.encryption.encryptionToken,
                 },
             });
         }
@@ -32,6 +35,7 @@ export class Client {
             method: method,
             headers: {
                 token: localStorage.getItem("token") || "",
+                encryptionToken: Client.encryption.encryptionToken,
             },
         });
     }
@@ -54,7 +58,8 @@ export class Client {
             response.status,
             response.ok,
             await response.text(),
-            response.url
+            response.url,
+            true
         );
 
         if (!parsedResponse.body.success) {
@@ -67,11 +72,17 @@ export class Client {
         );
     }
 
-    public static async login(formData: LoginData): Promise<Response> {
+    public static async login(
+        username: string,
+        password: string
+    ): Promise<Response> {
         let response = await this.request(
             "/login",
             "POST",
-            JSON.stringify(formData)
+            JSON.stringify({
+                username: username,
+                password: Encryption.sha256(password),
+            })
         );
 
         return new Response(
@@ -82,11 +93,19 @@ export class Client {
         );
     }
 
-    public static async register(formData: RegisterData): Promise<Response> {
+    public static async register(
+        email: string,
+        username: string,
+        password: string
+    ): Promise<Response> {
         let response = await this.request(
             "/register",
             "POST",
-            JSON.stringify(formData)
+            JSON.stringify({
+                email: email,
+                username: username,
+                password: Encryption.sha256(password),
+            })
         );
 
         return new Response(
@@ -221,6 +240,44 @@ export class Client {
 
         return products;
     }
+
+    public static async handshakeInit(
+        encryptionToken: string
+    ): Promise<Response> {
+        let response = await this.request(
+            "/handshake/init",
+            "POST",
+            JSON.stringify({ encryptionToken: encryptionToken })
+        );
+
+        return new Response(
+            response.status,
+            response.ok,
+            await response.text(),
+            response.url
+        );
+    }
+
+    public static async handshakeExchange(
+        encryptionToken: string,
+        publicKey: string
+    ): Promise<Response> {
+        let response = await this.request(
+            "/handshake/exchange",
+            "POST",
+            JSON.stringify({
+                encryptionToken: encryptionToken,
+                publicKey: publicKey,
+            })
+        );
+
+        return new Response(
+            response.status,
+            response.ok,
+            await response.text(),
+            response.url
+        );
+    }
 }
 
 export class Response {
@@ -229,10 +286,18 @@ export class Response {
     public body: any;
     public url: string;
 
-    constructor(status: number, ok: boolean, body: string, url: string) {
+    constructor(
+        status: number,
+        ok: boolean,
+        body: string,
+        url: string,
+        encrypted: boolean = false
+    ) {
         this.status = status;
         this.ok = ok;
-        this.body = JSON.parse(body);
+        this.body = JSON.parse(
+            encrypted ? Client.encryption.decrypt(body) : body
+        );
         this.url = url;
     }
 }
