@@ -1,4 +1,5 @@
 export class Product {
+    static defaultProduct: Product = {} as Product;
     id: number;
     title: string;
     description: string;
@@ -14,6 +15,7 @@ export class Product {
         description: string,
         price: number,
         image: string,
+        inWishlist: boolean,
         leftEyeX: number = 0,
         leftEyeY: number = 0,
         rightEyeX: number = 0,
@@ -26,7 +28,7 @@ export class Product {
         this.price = price;
         this.image = new Image();
         this.image.src = "data:image/jpg;base64," + image;
-        this.inWishlist = true;
+        this.inWishlist = inWishlist;
         this.leftEye = { x: leftEyeX, y: leftEyeY };
         this.rightEye = { x: rightEyeX, y: rightEyeY };
     }
@@ -42,6 +44,7 @@ export class Product {
             data.description,
             data.price,
             data.image,
+            data.inWishlist,
             data.leftEyeX,
             data.leftEyeY,
             data.rightEyeX,

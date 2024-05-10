@@ -20,9 +20,9 @@ const RegisterView = () => {
         username: string;
         password: string;
     }>({
-        email: "yali@yali.com",
-        username: "yali1234",
-        password: "yali1234",
+        email: "email@email.com",
+        username: "yoav1234",
+        password: "yoav1234",
     });
 
     const [isAlertOpen, setAlertIsOpen] = useState(false);
@@ -103,6 +103,12 @@ const RegisterView = () => {
                     <Grid item>
                         <Button type="submit" variant="outlined" size="large">
                             Register
+                        </Button>
+                    </Grid>
+
+                    <Grid item>
+                        <Button onClick={() => route(RouteOptions.LOGIN)} variant="outlined" size="large">
+                            Login
                         </Button>
                     </Grid>
                 </Grid>

@@ -13,7 +13,7 @@ import { Client } from "../../utils/Protocol";
 const HomeView = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [selectedProduct, setSelectedProduct] = useState<Product>(
-        {} as Product
+        Product.defaultProduct
     );
 
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -98,17 +98,20 @@ const HomeView = () => {
                             }}
                         >
                             <Badge.Ribbon
-                                text={selectedProduct.price}
+                                text={selectedProduct != Product.defaultProduct ? selectedProduct.price  + "$": ""}
                                 color={Color.PRIMARY}
                             >
                                 <Avatar
                                     shape="square"
                                     size={64}
                                     style={{ width: 200 }}
-                                    onClick={() =>
-                                        route(RouteOptions.PRODUCT, {
-                                            id: selectedProduct.id,
-                                        })
+                                    onClick={() => {
+                                            if (selectedProduct != Product.defaultProduct) {
+                                                route(RouteOptions.PRODUCT, {
+                                                    id: selectedProduct.id,
+                                                })
+                                            }
+                                        }
                                     }
                                 >
                                     {selectedProduct.title}

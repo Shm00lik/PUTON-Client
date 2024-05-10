@@ -44,7 +44,7 @@ const CircledProduct = ({
     return (
         <>
             {withPriceBadget ? (
-                <Badge.Ribbon text={product.price} color={Color.PRIMARY}>
+                <Badge.Ribbon text={product.price + "$"} color={Color.PRIMARY}>
                     {getAvatar()}
                 </Badge.Ribbon>
             ) : (
