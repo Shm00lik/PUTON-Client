@@ -7,13 +7,13 @@ import {
     TextField,
 } from "@mui/material";
 import { FormEvent, useState } from "react";
+import { RouteOptions, route } from "../../App";
+import { Client } from "../../utils/Protocol";
 import {
-    MIN_PASSWORD_LENGTH,
     MIN_USERNAME_LENGTH,
-    RouteOptions,
-    route,
-} from "../../App";
-import { Client, Response } from "../../utils/Protocol";
+    MIN_PASSWORD_LENGTH,
+} from "../register/RegisterView";
+import Encryption from "../../utils/encryption/Encryption";
 
 const LoginView = () => {
     const [formData, setFormData] = useState<{
@@ -35,19 +35,19 @@ const LoginView = () => {
     const handleLogin = async (event: FormEvent) => {
         event.preventDefault();
 
-        let result: Response = await Client.login(
-            formData.username,
-            formData.password
-        );
+        let result = await Client.getInstance().request("/login", "POST", {
+            username: formData.username,
+            password: Encryption.sha256(formData.password),
+        });
 
-        if (!result.body.success) {
-            handleAlert(result.body.message, "error");
+        if (!result.success) {
+            handleAlert(result.message, "error");
             return;
         }
 
-        localStorage.setItem("token", result.body.message.token);
+        localStorage.setItem("token", result.token);
 
-        handleAlert(result.body.message, "success");
+        handleAlert(result.message, "success");
 
         route(RouteOptions.HOME);
     };

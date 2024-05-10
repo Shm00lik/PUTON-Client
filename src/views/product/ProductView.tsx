@@ -15,7 +15,9 @@ const ProductView = () => {
     const [product, setProduct] = useState<Product | null>(null);
 
     useEffect(() => {
-        Client.product(Number(id)).then((p) => setProduct(p));
+        Client.getInstance()
+            .request("/product/" + id, "GET")
+            .then((p) => setProduct(Product.fromResponse(p)));
     }, []);
 
     if (product == null) {

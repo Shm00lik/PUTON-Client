@@ -1,11 +1,11 @@
-import { Avatar, Card, Flex } from "antd";
+import { HeartFilled, HeartOutlined } from "@ant-design/icons";
+import { Card, Flex } from "antd";
 import Meta from "antd/es/card/Meta";
+import { useState } from "react";
 import { Product } from "../utils/Product.ts";
-import { HeartOutlined, HeartFilled } from "@ant-design/icons";
-import CircledProduct from "./CircledProduct.tsx";
 import { Client } from "../utils/Protocol.ts";
 import { Color } from "../utils/Utils.ts";
-import { useState } from "react";
+import CircledProduct from "./CircledProduct.tsx";
 
 interface Props {
     product: Product;
@@ -26,18 +26,32 @@ const ProductCard = ({ product, onClick }: Props) => {
                             {product.inWishlist ? (
                                 <HeartFilled
                                     onClick={() => {
-                                        Client.wishlistProduct(product);
-                                        product.inWishlist = false;
-                                        setN(n + 1);
+                                        Client.getInstance()
+                                            .request(
+                                                "/wishlistProduct",
+                                                "POST",
+                                                { id: product.id }
+                                            )
+                                            .then(() => {
+                                                product.inWishlist = false;
+                                                setN(n + 1);
+                                            });
                                     }}
                                     style={{ color: Color.RED }}
                                 />
                             ) : (
                                 <HeartOutlined
                                     onClick={() => {
-                                        Client.wishlistProduct(product);
-                                        product.inWishlist = true;
-                                        setN(n + 1);
+                                        Client.getInstance()
+                                            .request(
+                                                "/wishlistProduct",
+                                                "POST",
+                                                { id: product.id }
+                                            )
+                                            .then(() => {
+                                                product.inWishlist = true;
+                                                setN(n + 1);
+                                            });
                                     }}
                                     style={{ color: Color.RED }}
                                 />

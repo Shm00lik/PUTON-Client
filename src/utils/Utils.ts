@@ -38,13 +38,3 @@ export enum Color {
     GREEN = "#51b52d",
     PRIMARY = "#15a288",
 }
-
-export class MeData {
-    username: string;
-    email: string;
-
-    constructor(username: string, email: string) {
-        this.username = username;
-        this.email = email;
-    }
-}

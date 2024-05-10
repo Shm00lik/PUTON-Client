@@ -13,7 +13,7 @@ import { Client } from "../../utils/Protocol";
 const HomeView = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [selectedProduct, setSelectedProduct] = useState<Product>(
-        Product.defaultProduct()
+        {} as Product
     );
 
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -23,7 +23,22 @@ const HomeView = () => {
     const [showWishlist, setShowWishlist] = useState<boolean>(false);
 
     useEffect(() => {
-        Client.products(6, 0).then((prods) => setProducts(prods));
+        const runThis = async () => {
+            let result = await Client.getInstance().request("/me", "GET");
+
+            if (!result.success) {
+                route(RouteOptions.LOGIN);
+                return;
+            }
+        };
+
+        runThis();
+    }, []);
+
+    useEffect(() => {
+        Client.getInstance()
+            .request("/products?amount=5&page=0", "GET")
+            .then((d) => setProducts(Product.fromResponseArray(d)));
     }, []);
 
     return (
@@ -82,10 +97,9 @@ const HomeView = () => {
                                 backdropFilter: "blur(10px)",
                             }}
                         >
-                            <Badge
-                                count={selectedProduct.price}
+                            <Badge.Ribbon
+                                text={selectedProduct.price}
                                 color={Color.PRIMARY}
-                                overflowCount={Infinity}
                             >
                                 <Avatar
                                     shape="square"
@@ -99,7 +113,7 @@ const HomeView = () => {
                                 >
                                     {selectedProduct.title}
                                 </Avatar>
-                            </Badge>
+                            </Badge.Ribbon>
 
                             <Avatar
                                 size={64}

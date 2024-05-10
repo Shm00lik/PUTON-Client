@@ -30,6 +30,7 @@ const CircledProduct = ({
                         ? {
                               border: "2px solid " + getBorderColor(),
                               backdropFilter: "blur(10px)",
+                              backgroundColor: "rgb(255, 255, 255, 0.2)",
                           }
                         : {}
                 }

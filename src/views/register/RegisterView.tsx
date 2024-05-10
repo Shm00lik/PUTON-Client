@@ -7,13 +7,12 @@ import {
     TextField,
 } from "@mui/material";
 import { FormEvent, useState } from "react";
-import {
-    MIN_PASSWORD_LENGTH,
-    MIN_USERNAME_LENGTH,
-    route,
-    RouteOptions,
-} from "../../App";
-import { Client, Response } from "../../utils/Protocol";
+import { route, RouteOptions } from "../../App";
+import { Client } from "../../utils/Protocol";
+import Encryption from "../../utils/encryption/Encryption";
+
+export const MIN_USERNAME_LENGTH: number = 6;
+export const MIN_PASSWORD_LENGTH: number = 6;
 
 const RegisterView = () => {
     const [formData, setFormData] = useState<{
@@ -37,20 +36,20 @@ const RegisterView = () => {
     const handleRegister = async (event: FormEvent) => {
         event.preventDefault();
 
-        let result: Response = await Client.register(
-            formData.email,
-            formData.username,
-            formData.password
-        );
+        let result = await Client.getInstance().request("/register", "POST", {
+            email: formData.email,
+            username: formData.username,
+            password: Encryption.sha256(formData.password),
+        });
 
-        if (!result.body.success) {
-            handleAlert(result.body.message, "error");
+        if (!result.success) {
+            handleAlert(result.message, "error");
             return;
         }
 
-        localStorage.setItem("token", result.body.message.token);
+        localStorage.setItem("token", result.token);
 
-        handleAlert(result.body.message, "success");
+        handleAlert(result.message, "success");
 
         route(RouteOptions.HOME);
     };

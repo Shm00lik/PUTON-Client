@@ -3,36 +3,38 @@ import DiffieHellman from "./DiffieHellman";
 import * as CryptoJS from "crypto-js";
 
 class Encryption {
-    encryptionToken: string;
-    diffieHellman: DiffieHellman | null;
-    sharedKey: string;
-    isReady: boolean;
+    public encryptionToken: string;
+    public diffieHellman: DiffieHellman | null;
+    public sharedKey: string;
+    public isReady: boolean;
 
-    constructor() {
-        this.encryptionToken = "";
+    public constructor() {
+        this.encryptionToken = Encryption.generateEncryptionToken();
         this.diffieHellman = null;
         this.sharedKey = "";
         this.isReady = false;
     }
 
     public async initialize(): Promise<boolean> {
-        let encryptionToken = Math.floor(Math.random() * 100000).toString();
-
-        this.encryptionToken = encryptionToken;
-
-        const response = (await Client.handshakeInit(encryptionToken)).body;
+        const response = await Client.getInstance().request(
+            "/handshake/init",
+            "POST",
+            { encryptionToken: this.encryptionToken },
+            false
+        );
 
         if (!response.success) {
             return false;
         }
 
         const params: { g: number; p: number } = {
-            g: response.message.g,
-            p: response.message.p,
+            g: Number(response.g),
+            p: Number(response.p),
         };
 
         this.diffieHellman = new DiffieHellman(params.g, params.p);
         console.log(params.g, params.p);
+
         return true;
     }
 
@@ -43,19 +45,22 @@ class Encryption {
 
         const publicKey = this.diffieHellman.generatePublicKey();
 
-        const response = (
-            await Client.handshakeExchange(
-                this.encryptionToken,
-                publicKey.toString()
-            )
-        ).body;
+        let response = await Client.getInstance().request(
+            "/handshake/exchange",
+            "POST",
+            {
+                encryptionToken: this.encryptionToken,
+                publicKey: publicKey,
+            },
+            false
+        );
 
         if (!response.success) {
             return false;
         }
 
         const sharedKey = this.diffieHellman.generateSharedKey(
-            response.message.serverPublicKey
+            Number(response.serverPublicKey)
         );
 
         console.warn(sharedKey);
@@ -65,10 +70,6 @@ class Encryption {
         this.isReady = true;
 
         return true;
-    }
-
-    public static diffieHellmanKeyToAES(diffieHellmanKey: string): string {
-        return Encryption.sha256(diffieHellmanKey);
     }
 
     public encrypt(data: string): string {
@@ -99,8 +100,16 @@ class Encryption {
         ).toString(CryptoJS.enc.Utf8);
     }
 
+    public static generateEncryptionToken(): string {
+        return Math.floor(Math.random() * 100000).toString();
+    }
+
     public static sha256(data: string): string {
         return CryptoJS.SHA256(data).toString(CryptoJS.enc.Hex);
+    }
+
+    public static diffieHellmanKeyToAES(diffieHellmanKey: string): string {
+        return Encryption.sha256(diffieHellmanKey);
     }
 }
 

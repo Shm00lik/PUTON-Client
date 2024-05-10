@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Client, LoginData, Response } from "../../utils/Protocol";
+import { Client } from "../../utils/Protocol";
 
 const Ping = () => {
     const [latency, setLatency] = useState(0);
@@ -8,8 +8,8 @@ const Ping = () => {
     useEffect(() => {
         const runThis = async () => {
             let start = new Date();
-            let result: Response = await Client.ping();
-            let end = new Date(Number(result.body.message) * 1000);
+            let result = await Client.getInstance().request("/ping", "POST");
+            let end = new Date(Number(result.now) * 1000);
 
             setLatency(end.getTime() - start.getTime());
             setLatencies([...latencies, end.getTime() - start.getTime()]);

@@ -15,7 +15,9 @@ const Wishlist = ({ show, setShow }: Props) => {
 
     useEffect(() => {
         if (!show) return;
-        Client.wishlist().then((wishlist) => setWishlist(wishlist));
+        Client.getInstance()
+            .request("/wishlist", "GET")
+            .then((d) => setWishlist(Product.fromResponseArray(d)));
     }, [show]);
 
     return (

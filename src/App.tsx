@@ -1,13 +1,12 @@
 import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
-import { Client, Response } from "./utils/Protocol";
+import { Client } from "./utils/Protocol";
 import HomeView from "./views/home/HomeView";
 import LoginView from "./views/login/LoginView";
 import RegisterView from "./views/register/RegisterView";
 import PingView from "./views/test/Ping";
 import ProductView from "./views/product/ProductView";
-import { MeData } from "./utils/Utils";
 import Test from "./views/test/Test";
 
 const theme = createTheme({
@@ -16,8 +15,6 @@ const theme = createTheme({
     },
 });
 
-export const MIN_USERNAME_LENGTH: number = 6;
-export const MIN_PASSWORD_LENGTH: number = 6;
 
 export const enum RouteOptions {
     HOME = "/",
@@ -44,23 +41,6 @@ export const route = function (
 };
 
 function App() {
-    const runThis = async () => {
-        if (
-            window.location.pathname == RouteOptions.LOGIN ||
-            window.location.pathname == RouteOptions.REGISTER
-        )
-            return;
-
-        let result: MeData | null = await Client.me();
-
-        if (result == null) {
-            route(RouteOptions.LOGIN);
-            return;
-        }
-    };
-
-    runThis();
-
     return (
         <div className="portraitScreen">
             <ThemeProvider theme={theme}>

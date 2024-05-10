@@ -1,7 +1,7 @@
-import { Modal, Space } from "antd";
+import { Button, Modal, Space } from "antd";
 import { useEffect, useState } from "react";
 import { Client } from "../utils/Protocol";
-import { MeData } from "../utils/Utils";
+import { RouteOptions, route } from "../App";
 
 interface Props {
     show: boolean;
@@ -9,11 +9,22 @@ interface Props {
 }
 
 const Wishlist = ({ show, setShow }: Props) => {
-    const [data, setData] = useState<MeData | null>();
+    const [data, setData] = useState<{ username: string; email: string }>({
+        username: "",
+        email: "",
+    });
+
+    const logout = () => {
+        localStorage.clear();
+
+        route(RouteOptions.LOGIN);
+    };
 
     useEffect(() => {
         if (!show) return;
-        Client.me().then((d) => setData(d));
+        Client.getInstance()
+            .request("/me", "GET")
+            .then((d) => setData({ username: d.username, email: d.email }));
     }, [show]);
 
     return (
@@ -23,14 +34,15 @@ const Wishlist = ({ show, setShow }: Props) => {
                 open={show}
                 closable
                 onCancel={() => setShow(false)}
-                footer={null}
+                footer={<Button onClick={logout}>LOGOUT</Button>}
                 centered
                 style={{ textAlign: "center" }}
                 styles={{ body: { maxHeight: "60vh", overflowY: "auto" } }}
             >
                 <Space direction="vertical">
-                    {data?.username}
-                    {data?.email}
+                    <div>Username: {data.username}</div>
+
+                    <div>Email: {data.email}</div>
                 </Space>
             </Modal>
         </>

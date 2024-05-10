@@ -1,303 +1,139 @@
-import { Product } from "./Product";
-import { MeData } from "./Utils";
 import Encryption from "./encryption/Encryption";
 
 export class Client {
-    public static HOST: string = "http://192.168.1.37";
+    public static HOST: string = "192.168.1.37";
     public static PORT: number = 3339;
-    public static baseURL: string = `${Client.HOST}:${Client.PORT}`;
-    public static encryption: Encryption = new Encryption();
+    public static baseURL: string = `http://${Client.HOST}:${Client.PORT}`;
+    public static ENCRYPTED: boolean = true;
+    private encryption: Encryption;
 
-    public static async initializeEncryption() {
-        await Client.encryption.initialize();
-        await Client.encryption.exchange();
+    private static instance: Client;
 
-        if (Client.encryption.isReady) {
-            console.warn(Client.encryption.sharedKey);
-        }
+    private requestsQueue: {
+        request: RequestData;
+        resolve: (value: any) => void;
+        reject: (reason?: any) => void;
+    }[] = [];
 
-        console.log(await this.me());
+    private constructor() {
+        this.encryption = new Encryption();
     }
 
-    private static async request(url: string, method: string, body?: string) {
-        if (method == "POST") {
-            return await fetch(Client.baseURL + url, {
-                method: method,
-                body: body ? body : null,
-                headers: {
-                    token: localStorage.getItem("token") || "",
-                    encryptionToken: Client.encryption.encryptionToken,
-                },
+    public static getInstance(): Client {
+        if (!Client.instance) {
+            Client.instance = new Client();
+
+            if (Client.ENCRYPTED) {
+                Client.instance.initializeEncryption();
+            }
+        }
+
+        return Client.instance;
+    }
+
+    public async initializeEncryption() {
+        await this.encryption.initialize();
+        await this.encryption.exchange();
+
+        if (this.encryption.isReady) {
+            console.warn(this.encryption.sharedKey);
+            await this.processQueuedRequests();
+        }
+    }
+
+    private async processQueuedRequests() {
+        while (this.requestsQueue.length > 0) {
+            const { request, resolve, reject } = this.requestsQueue.shift()!;
+
+            try {
+                const result = await this.sendRequest(request);
+                resolve(result);
+            } catch (error) {
+                reject(error);
+            }
+        }
+    }
+
+    public async request(
+        url: string,
+        method: string,
+        body: {} = {},
+        encrypt: boolean = Client.ENCRYPTED
+    ): Promise<{ success: boolean } & { [key: string]: string }> {
+        if (!encrypt || this.encryption.isReady) {
+            return this.sendRequest(
+                new RequestData(url, method, body, encrypt)
+            );
+        }
+
+        return new Promise((resolve, reject) => {
+            this.requestsQueue.push({
+                request: new RequestData(url, method, body, encrypt),
+                resolve,
+                reject,
+            });
+        });
+    }
+
+    public async sendRequest(
+        requestData: RequestData
+    ): Promise<{ success: boolean } & any> {
+        let response = null;
+
+        if (requestData.method == "POST") {
+            const requestBody = requestData.encrypt
+                ? this.encryption.encrypt(JSON.stringify(requestData.body))
+                : JSON.stringify(requestData.body);
+
+            response = await fetch(Client.baseURL + requestData.url, {
+                method: requestData.method,
+                body: requestBody,
+                headers: this.getHeaders(requestData.encrypt),
+            });
+        } else {
+            response = await fetch(Client.baseURL + requestData.url, {
+                method: requestData.method,
+                headers: this.getHeaders(requestData.encrypt),
             });
         }
 
-        return await fetch(Client.baseURL + url, {
-            method: method,
-            headers: {
+        const responseBody = await response.text();
+
+        console.log(
+            JSON.parse(
+                requestData.encrypt
+                    ? this.encryption.decrypt(responseBody)
+                    : responseBody
+            )
+        );
+
+        return JSON.parse(
+            requestData.encrypt
+                ? this.encryption.decrypt(responseBody)
+                : responseBody
+        );
+    }
+
+    public getHeaders(encrypted: boolean): {} {
+        if (encrypted) {
+            return {
                 token: localStorage.getItem("token") || "",
-                encryptionToken: Client.encryption.encryptionToken,
-            },
-        });
-    }
-
-    public static async ping(): Promise<Response> {
-        let response = await this.request("/ping", "POST");
-
-        return new Response(
-            response.status,
-            response.ok,
-            await response.text(),
-            response.url
-        );
-    }
-
-    public static async me(): Promise<MeData | null> {
-        let response = await this.request("/me", "GET");
-
-        let parsedResponse = new Response(
-            response.status,
-            response.ok,
-            await response.text(),
-            response.url,
-            true
-        );
-
-        if (!parsedResponse.body.success) {
-            return null;
+                encryptionToken: this.encryption.encryptionToken,
+            };
         }
 
-        return new MeData(
-            parsedResponse.body.message.username,
-            parsedResponse.body.message.email
-        );
-    }
-
-    public static async login(
-        username: string,
-        password: string
-    ): Promise<Response> {
-        let response = await this.request(
-            "/login",
-            "POST",
-            JSON.stringify({
-                username: username,
-                password: Encryption.sha256(password),
-            })
-        );
-
-        return new Response(
-            response.status,
-            response.ok,
-            await response.text(),
-            response.url
-        );
-    }
-
-    public static async register(
-        email: string,
-        username: string,
-        password: string
-    ): Promise<Response> {
-        let response = await this.request(
-            "/register",
-            "POST",
-            JSON.stringify({
-                email: email,
-                username: username,
-                password: Encryption.sha256(password),
-            })
-        );
-
-        return new Response(
-            response.status,
-            response.ok,
-            await response.text(),
-            response.url
-        );
-    }
-
-    public static async logout(): Promise<Response> {
-        // localStorage.clear();
-
-        return new Response(200, true, JSON.stringify({ success: true }), "/");
-    }
-
-    public static async wishlist(): Promise<Product[]> {
-        let response = await this.request("/wishlist", "GET");
-
-        let parsedResponse: Response = new Response(
-            response.status,
-            response.ok,
-            await response.text(),
-            response.url
-        );
-
-        let products: Product[] = [];
-
-        if (!parsedResponse.body.success) {
-            return products;
-        }
-
-        parsedResponse.body.message.forEach((product: any) => {
-            products.push(
-                new Product(
-                    product.productID,
-                    product.title,
-                    product.description,
-                    product.price,
-                    product.image,
-                    product.inWishlist
-                )
-            );
-        });
-
-        return products;
-    }
-
-    public static async product(id: number | string): Promise<Product | null> {
-        let response = await this.request("/product/" + id, "GET");
-
-        let parsedResponse = new Response(
-            response.status,
-            response.ok,
-            await response.text(),
-            response.url
-        );
-
-        if (!parsedResponse.body.success) {
-            return null;
-        }
-
-        return new Product(
-            parsedResponse.body.message.productID,
-            parsedResponse.body.message.title,
-            parsedResponse.body.message.description,
-            parsedResponse.body.message.price,
-            parsedResponse.body.message.image,
-            parsedResponse.body.message.inWishlist,
-            parsedResponse.body.message.leftEyeX,
-            parsedResponse.body.message.leftEyeY,
-            parsedResponse.body.message.rightEyeX,
-            parsedResponse.body.message.rightEyeY
-        );
-    }
-
-    public static async wishlistProduct(product: Product): Promise<Response> {
-        let response = await this.request(
-            "/wishlistProduct",
-            "POST",
-            JSON.stringify({
-                id: product.id,
-            })
-        );
-
-        return new Response(
-            response.status,
-            response.ok,
-            await response.text(),
-            response.url
-        );
-    }
-
-    public static async products(
-        amount: number,
-        page: number
-    ): Promise<Product[]> {
-        let response = await this.request(
-            `/products?amount=${amount}&page=${page}`,
-            "GET"
-        );
-
-        let parsedResponse: Response = new Response(
-            response.status,
-            response.ok,
-            await response.text(),
-            response.url
-        );
-
-        let products: Product[] = [];
-
-        if (!parsedResponse.body.success) {
-            return products;
-        }
-
-        parsedResponse.body.message.forEach((product: any) => {
-            products.push(
-                new Product(
-                    product.productID,
-                    product.title,
-                    product.description,
-                    product.price,
-                    product.image,
-                    product.inWishlist,
-                    product.leftEyeX,
-                    product.leftEyeY,
-                    product.rightEyeX,
-                    product.rightEyeY
-                )
-            );
-        });
-
-        return products;
-    }
-
-    public static async handshakeInit(
-        encryptionToken: string
-    ): Promise<Response> {
-        let response = await this.request(
-            "/handshake/init",
-            "POST",
-            JSON.stringify({ encryptionToken: encryptionToken })
-        );
-
-        return new Response(
-            response.status,
-            response.ok,
-            await response.text(),
-            response.url
-        );
-    }
-
-    public static async handshakeExchange(
-        encryptionToken: string,
-        publicKey: string
-    ): Promise<Response> {
-        let response = await this.request(
-            "/handshake/exchange",
-            "POST",
-            JSON.stringify({
-                encryptionToken: encryptionToken,
-                publicKey: publicKey,
-            })
-        );
-
-        return new Response(
-            response.status,
-            response.ok,
-            await response.text(),
-            response.url
-        );
+        return {
+            token: localStorage.getItem("token") || "",
+        };
     }
 }
 
-export class Response {
-    public status: number;
-    public ok: boolean;
-    public body: any;
-    public url: string;
-
-    constructor(
-        status: number,
-        ok: boolean,
-        body: string,
-        url: string,
-        encrypted: boolean = false
-    ) {
-        this.status = status;
-        this.ok = ok;
-        this.body = JSON.parse(
-            encrypted ? Client.encryption.decrypt(body) : body
-        );
-        this.url = url;
-    }
+class RequestData {
+    public constructor(
+        public url: string,
+        public method: string,
+        public body: {},
+        public encrypt: boolean = Client.ENCRYPTED
+    ) {}
 }
+Client.getInstance();
