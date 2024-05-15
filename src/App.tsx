@@ -13,8 +13,22 @@ const theme = createTheme({
     typography: {
         fontFamily: "Heebo",
     },
-});
 
+    palette: {
+        mode: "light",
+
+        primary: {
+            main: "#18A48C",
+        },
+        secondary: {
+            main: "#42B8A3",
+        },
+
+        background: {
+            default: "#333339",
+        },
+    },
+});
 
 export const enum RouteOptions {
     HOME = "/",
