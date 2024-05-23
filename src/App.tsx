@@ -8,6 +8,7 @@ import RegisterView from "./views/register/RegisterView";
 import PingView from "./views/test/Ping";
 import ProductView from "./views/product/ProductView";
 import Test from "./views/test/Test";
+import PageNotFoundView from "./views/404/NotFoundView";
 
 const theme = createTheme({
     typography: {
@@ -93,7 +94,7 @@ function App() {
 
                             <Route
                                 path={RouteOptions.NOT_FOUND}
-                                element={<HomeView />}
+                                element={<PageNotFoundView />}
                             />
                         </Routes>
                     </BrowserRouter>
