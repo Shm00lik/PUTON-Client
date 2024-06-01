@@ -267,7 +267,7 @@ const PoseDetectionComponent = ({
         ctx?.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     };
 
-    return <>{detect?.score}</>;
+    return <></>;
 };
 
 export default PoseDetectionComponent;
